@@ -46,13 +46,15 @@
                     <p class="subtitle">Redes Carreras S.L. - Telecomunicaciones</p>
                 </div>
             </div>
-            <button id="btnNuevoAlbaran" class="btn btn-primary">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <line x1="12" y1="5" x2="12" y2="19"></line>
-                    <line x1="5" y1="12" x2="19" y2="12"></line>
-                </svg>
-                Nuevo Albarán
-            </button>
+            <div class="header-actions">
+                <button id="btnNuevoAlbaran" class="btn btn-primary">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>
+                    Nuevo Albarán
+                </button>
+            </div>
         </div>
     </header>
 
@@ -71,6 +73,14 @@
                 <button class="tab-btn" data-tab="faltantes">
                     <span class="tab-icon">⚠️</span>
                     Material Faltante <span id="count-faltantes" class="count-badge">0</span>
+                </button>
+                <button class="tab-btn" data-tab="cables">
+                    <span class="tab-icon">🔌</span>
+                    Cable <span id="count-cables" class="count-badge">0</span>
+                </button>
+                <button class="tab-btn" data-tab="subconductos">
+                    <span class="tab-icon">🛡️</span>
+                    Subconducto <span id="count-subconductos" class="count-badge">0</span>
                 </button>
                 <button class="tab-btn" data-tab="reportes">
                     <span class="tab-icon">📊</span>
@@ -110,6 +120,92 @@
                     </div>
                     <div id="lista-faltantes" class="albaranes-grid">
                         <!-- Los albaranes se cargarán aquí dinámicamente -->
+                    </div>
+                </div>
+
+                <!-- Cable Tab -->
+                <div id="tab-cables" class="tab-content">
+                    <div class="tab-header">
+                        <h2>Control de Cable</h2>
+                        <p class="tab-description">Gestión de cable utilizado e instalado en obras</p>
+                        <div class="tab-actions">
+                            <button id="btnNuevoCableInstalacion" class="btn btn-warning">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                                </svg>
+                                Nuevo Cable
+                            </button>
+                            <button id="btnEntradaCable" class="btn btn-success">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                                </svg>
+                                Entrada Cable
+                            </button>
+                        </div>
+                    </div>
+                    <div class="stock-info">
+                        <div class="stock-grid">
+                            <div class="stock-card">
+                                <div class="stock-number" id="cable-recibido">0</div>
+                                <div class="stock-label">Metros Recibidos</div>
+                            </div>
+                            <div class="stock-card">
+                                <div class="stock-number" id="cable-instalado">0</div>
+                                <div class="stock-label">Metros Instalados</div>
+                            </div>
+                            <div class="stock-card">
+                                <div class="stock-number" id="cable-disponible">0</div>
+                                <div class="stock-label">Metros Disponibles</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="lista-cables" class="albaranes-grid">
+                        <!-- Los cables se cargarán aquí dinámicamente -->
+                    </div>
+                </div>
+
+                <!-- Subconducto Tab -->
+                <div id="tab-subconductos" class="tab-content">
+                    <div class="tab-header">
+                        <h2>Control de Subconducto</h2>
+                        <p class="tab-description">Gestión de subconducto utilizado e instalado en obras</p>
+                        <div class="tab-actions">
+                            <button id="btnNuevoSubconductoInstalacion" class="btn btn-secondary">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                                </svg>
+                                Nuevo Subconducto
+                            </button>
+                            <button id="btnEntradaSubconducto" class="btn btn-success">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                                </svg>
+                                Entrada Subconducto
+                            </button>
+                        </div>
+                    </div>
+                    <div class="stock-info">
+                        <div class="stock-grid">
+                            <div class="stock-card">
+                                <div class="stock-number" id="subconducto-recibido">0</div>
+                                <div class="stock-label">Metros Recibidos</div>
+                            </div>
+                            <div class="stock-card">
+                                <div class="stock-number" id="subconducto-instalado">0</div>
+                                <div class="stock-label">Metros Instalados</div>
+                            </div>
+                            <div class="stock-card">
+                                <div class="stock-number" id="subconducto-disponible">0</div>
+                                <div class="stock-label">Metros Disponibles</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="lista-subconductos" class="albaranes-grid">
+                        <!-- Los subconductos se cargarán aquí dinámicamente -->
                     </div>
                 </div>
 
@@ -153,6 +249,22 @@
                                     Descargar PDF
                                 </button>
                             </div>
+                            <div class="reporte-card">
+                                <div class="reporte-icon">🔌</div>
+                                <h3>Reporte de Cables</h3>
+                                <p>Control detallado de cables instalados y entradas</p>
+                                <button class="btn btn-warning" onclick="generarReporte('cables')">
+                                    Descargar PDF
+                                </button>
+                            </div>
+                            <div class="reporte-card">
+                                <div class="reporte-icon">🛡️</div>
+                                <h3>Reporte de Subconductos</h3>
+                                <p>Control detallado de subconductos instalados y entradas</p>
+                                <button class="btn btn-secondary" onclick="generarReporte('subconductos')">
+                                    Descargar PDF
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -188,6 +300,10 @@
                         <option value="FTTN">FTTN (Fiber To The Node)</option>
                         <option value="TESA">TESA (Telecomunicaciones)</option>
                     </select>
+                </div>
+                <div class="form-group">
+                    <label for="jefeObra">Jefe de Obra</label>
+                    <input type="text" id="jefeObra" name="jefeObra" placeholder="Nombre del jefe de obra (opcional)">
                 </div>
                 <div class="form-group">
                     <label for="observaciones">Observaciones</label>
@@ -242,6 +358,238 @@
                     <button type="button" class="btn btn-success" onclick="confirmarRecepcion()">Confirmar</button>
                 </div>
             </div>
+        </div>
+    </div>
+
+    <!-- Modal para Nuevo Cable -->
+    <div id="modalNuevoCable" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Registrar Cable</h2>
+                <button class="modal-close" onclick="cerrarModalCable()">&times;</button>
+            </div>
+            <form id="formNuevoCable" class="modal-body">
+                <div class="form-group">
+                    <label for="idObraCable">ID de Obra *</label>
+                    <input type="text" id="idObraCable" name="idObra" required placeholder="Ej: OBR-2024-001">
+                </div>
+                <div class="form-group">
+                    <label for="tipoCable">Tipo de Cable *</label>
+                    <select id="tipoCable" name="tipoCable" required>
+                        <option value="">Seleccionar tipo de cable...</option>
+                        <option value="Cable de f.o. de exterior PKP holgado de 8 fo.">Cable de f.o. de exterior PKP holgado de 8 fo.</option>
+                        <option value="Cable de f.o. de exterior PKP holgado de 16 fo.">Cable de f.o. de exterior PKP holgado de 16 fo.</option>
+                        <option value="Cable de f.o. de exterior PKP holgado de 24 fo.">Cable de f.o. de exterior PKP holgado de 24 fo.</option>
+                        <option value="Cable de f.o. de exterior PKP holgado de 32 fo.">Cable de f.o. de exterior PKP holgado de 32 fo.</option>
+                        <option value="Cable de f.o. de exterior PKP holgado de 48 fo.">Cable de f.o. de exterior PKP holgado de 48 fo.</option>
+                        <option value="Cable de f.o. de exterior PKP holgado de 64 fo.">Cable de f.o. de exterior PKP holgado de 64 fo.</option>
+                        <option value="Cable de f.o. de exterior PKP holgado de 128 fo.">Cable de f.o. de exterior PKP holgado de 128 fo.</option>
+                        <option value="Cable de f.o. de exterior PKP holgado de 256 fo.">Cable de f.o. de exterior PKP holgado de 256 fo.</option>
+                        <option value="Cable de f.o. de exterior PKP holgado de 512 fo.">Cable de f.o. de exterior PKP holgado de 512 fo.</option>
+                        <option value="Cable de f.o. de exterior KP holgado de 768 fo.">Cable de f.o. de exterior KP holgado de 768 fo.</option>
+                        <option value="Cable de f.o. de exterior KP compacto de 864 fo.">Cable de f.o. de exterior KP compacto de 864 fo.</option>
+                        <option value="Cable de f.o. de exterior KP compacto de 912 fo.">Cable de f.o. de exterior KP compacto de 912 fo.</option>
+                        <option value="Cable de f.o. de interior KT de 8 fo.">Cable de f.o. de interior KT de 8 fo.</option>
+                        <option value="Cable de f.o. de interior TKT de 16 fo.">Cable de f.o. de interior TKT de 16 fo.</option>
+                        <option value="Cable de f.o. de interior TKT de 24 fo.">Cable de f.o. de interior TKT de 24 fo.</option>
+                        <option value="Cable de f.o. de interior TKT de 32 fo.">Cable de f.o. de interior TKT de 32 fo.</option>
+                        <option value="Cable de f.o. de interior TKT de 48 fo.">Cable de f.o. de interior TKT de 48 fo.</option>
+                        <option value="Cable de f.o. de interior TKT de 64 fo.">Cable de f.o. de interior TKT de 64 fo.</option>
+                        <option value="Cable de f.o. de interior TKT de 128 fo.">Cable de f.o. de interior TKT de 128 fo.</option>
+                        <option value="Cable de f.o. de interior TKT de 256 fo.">Cable de f.o. de interior TKT de 256 fo.</option>
+                        <option value="Cable de f.o. de interior KT de 512 fo.">Cable de f.o. de interior KT de 512 fo.</option>
+                        <option value="Cable de f.o. 16 VT.">Cable de f.o. 16 VT.</option>
+                        <option value="Cable de f.o. 32 VT.">Cable de f.o. 32 VT.</option>
+                        <option value="Cable de f.o. 64 VT.">Cable de f.o. 64 VT.</option>
+                        <option value="Cable KT 8 fo G.652.D monotubo BLANCO">Cable KT 8 fo G.652.D monotubo BLANCO</option>
+                        <option value="Cable KP 16 fo G.652.D (4x4f+2e) BLANCO">Cable KP 16 fo G.652.D (4x4f+2e) BLANCO</option>
+                        <option value="Cable FVT micromódulos 16 fo G.657 A2 (4x4f) BLANCO">Cable FVT micromódulos 16 fo G.657 A2 (4x4f) BLANCO</option>
+                        <option value="Cable KP 32 fo G.652.D (8x4f) BLANCO">Cable KP 32 fo G.652.D (8x4f) BLANCO</option>
+                        <option value="Cable FVT micromódulos 32 fo G.657 A2 (8x4f) BLANCO">Cable FVT micromódulos 32 fo G.657 A2 (8x4f) BLANCO</option>
+                        <option value="Cable KP 64 fo G.652.D (8x8f) BLANCO">Cable KP 64 fo G.652.D (8x8f) BLANCO</option>
+                        <option value="Cable FVT micromódulos 64 fo G.657 A2 (8x8f) BLANCO">Cable FVT micromódulos 64 fo G.657 A2 (8x8f) BLANCO</option>
+                        <option value="Cable de f.o. de interior riser de 16 fo.">Cable de f.o. de interior riser de 16 fo.</option>
+                        <option value="Cable de f.o. de interior riser de 24 fo.">Cable de f.o. de interior riser de 24 fo.</option>
+                        <option value="Cable de f.o. de interior riser de 32 fo.">Cable de f.o. de interior riser de 32 fo.</option>
+                        <option value="Cable de f.o. de interior riser de 48 fo.">Cable de f.o. de interior riser de 48 fo.</option>
+                        <option value="Cable de f.o. de exterior KP holgado de 16 fo.">Cable de f.o. de exterior KP holgado de 16 fo.</option>
+                        <option value="Cable de f.o. de exterior KP holgado de 32 fo.">Cable de f.o. de exterior KP holgado de 32 fo.</option>
+                        <option value="Cable de f.o. de exterior KP holgado de 64 fo.">Cable de f.o. de exterior KP holgado de 64 fo.</option>
+                        <option value="Cable de f.o. de exterior KP holgado de 128 fo.">Cable de f.o. de exterior KP holgado de 128 fo.</option>
+                        <option value="Cable de f.o. de exterior riser de 16 fo.">Cable de f.o. de exterior riser de 16 fo.</option>
+                        <option value="Cable de f.o. de exterior riser de 32 fo.">Cable de f.o. de exterior riser de 32 fo.</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="metrosCable">Metros *</label>
+                    <input type="number" id="metrosCable" name="metros" required min="0" step="0.1" placeholder="Ej: 150.5">
+                </div>
+                <div class="form-group">
+                    <label for="fechaCable">Fecha</label>
+                    <input type="date" id="fechaCable" name="fecha">
+                </div>
+                <div class="form-group">
+                    <label for="observacionesCable">Observaciones</label>
+                    <textarea id="observacionesCable" name="observaciones" rows="3" placeholder="Observaciones adicionales (opcional)"></textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="cerrarModalCable()">Cancelar</button>
+                    <button type="submit" class="btn btn-warning">Registrar Cable</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal para Entrada Cable -->
+    <div id="modalEntradaCable" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Entrada de Cable</h2>
+                <button class="modal-close" onclick="cerrarModalEntradaCable()">&times;</button>
+            </div>
+            <form id="formEntradaCable" class="modal-body">
+                <div class="form-group">
+                    <label for="tipoCableEntrada">Tipo de Cable *</label>
+                    <select id="tipoCableEntrada" name="tipoCable" required>
+                        <option value="">Seleccionar tipo de cable...</option>
+                        <option value="Cable de f.o. de exterior PKP holgado de 8 fo.">Cable de f.o. de exterior PKP holgado de 8 fo.</option>
+                        <option value="Cable de f.o. de exterior PKP holgado de 16 fo.">Cable de f.o. de exterior PKP holgado de 16 fo.</option>
+                        <option value="Cable de f.o. de exterior PKP holgado de 24 fo.">Cable de f.o. de exterior PKP holgado de 24 fo.</option>
+                        <option value="Cable de f.o. de exterior PKP holgado de 32 fo.">Cable de f.o. de exterior PKP holgado de 32 fo.</option>
+                        <option value="Cable de f.o. de exterior PKP holgado de 48 fo.">Cable de f.o. de exterior PKP holgado de 48 fo.</option>
+                        <option value="Cable de f.o. de exterior PKP holgado de 64 fo.">Cable de f.o. de exterior PKP holgado de 64 fo.</option>
+                        <option value="Cable de f.o. de exterior PKP holgado de 128 fo.">Cable de f.o. de exterior PKP holgado de 128 fo.</option>
+                        <option value="Cable de f.o. de exterior PKP holgado de 256 fo.">Cable de f.o. de exterior PKP holgado de 256 fo.</option>
+                        <option value="Cable de f.o. de exterior PKP holgado de 512 fo.">Cable de f.o. de exterior PKP holgado de 512 fo.</option>
+                        <option value="Cable de f.o. de exterior KP holgado de 768 fo.">Cable de f.o. de exterior KP holgado de 768 fo.</option>
+                        <option value="Cable de f.o. de exterior KP compacto de 864 fo.">Cable de f.o. de exterior KP compacto de 864 fo.</option>
+                        <option value="Cable de f.o. de exterior KP compacto de 912 fo.">Cable de f.o. de exterior KP compacto de 912 fo.</option>
+                        <option value="Cable de f.o. de interior KT de 8 fo.">Cable de f.o. de interior KT de 8 fo.</option>
+                        <option value="Cable de f.o. de interior TKT de 16 fo.">Cable de f.o. de interior TKT de 16 fo.</option>
+                        <option value="Cable de f.o. de interior TKT de 24 fo.">Cable de f.o. de interior TKT de 24 fo.</option>
+                        <option value="Cable de f.o. de interior TKT de 32 fo.">Cable de f.o. de interior TKT de 32 fo.</option>
+                        <option value="Cable de f.o. de interior TKT de 48 fo.">Cable de f.o. de interior TKT de 48 fo.</option>
+                        <option value="Cable de f.o. de interior TKT de 64 fo.">Cable de f.o. de interior TKT de 64 fo.</option>
+                        <option value="Cable de f.o. de interior TKT de 128 fo.">Cable de f.o. de interior TKT de 128 fo.</option>
+                        <option value="Cable de f.o. de interior TKT de 256 fo.">Cable de f.o. de interior TKT de 256 fo.</option>
+                        <option value="Cable de f.o. de interior KT de 512 fo.">Cable de f.o. de interior KT de 512 fo.</option>
+                        <option value="Cable de f.o. 16 VT.">Cable de f.o. 16 VT.</option>
+                        <option value="Cable de f.o. 32 VT.">Cable de f.o. 32 VT.</option>
+                        <option value="Cable de f.o. 64 VT.">Cable de f.o. 64 VT.</option>
+                        <option value="Cable KT 8 fo G.652.D monotubo BLANCO">Cable KT 8 fo G.652.D monotubo BLANCO</option>
+                        <option value="Cable KP 16 fo G.652.D (4x4f+2e) BLANCO">Cable KP 16 fo G.652.D (4x4f+2e) BLANCO</option>
+                        <option value="Cable FVT micromódulos 16 fo G.657 A2 (4x4f) BLANCO">Cable FVT micromódulos 16 fo G.657 A2 (4x4f) BLANCO</option>
+                        <option value="Cable KP 32 fo G.652.D (8x4f) BLANCO">Cable KP 32 fo G.652.D (8x4f) BLANCO</option>
+                        <option value="Cable FVT micromódulos 32 fo G.657 A2 (8x4f) BLANCO">Cable FVT micromódulos 32 fo G.657 A2 (8x4f) BLANCO</option>
+                        <option value="Cable KP 64 fo G.652.D (8x8f) BLANCO">Cable KP 64 fo G.652.D (8x8f) BLANCO</option>
+                        <option value="Cable FVT micromódulos 64 fo G.657 A2 (8x8f) BLANCO">Cable FVT micromódulos 64 fo G.657 A2 (8x8f) BLANCO</option>
+                        <option value="Cable de f.o. de interior riser de 16 fo.">Cable de f.o. de interior riser de 16 fo.</option>
+                        <option value="Cable de f.o. de interior riser de 24 fo.">Cable de f.o. de interior riser de 24 fo.</option>
+                        <option value="Cable de f.o. de interior riser de 32 fo.">Cable de f.o. de interior riser de 32 fo.</option>
+                        <option value="Cable de f.o. de interior riser de 48 fo.">Cable de f.o. de interior riser de 48 fo.</option>
+                        <option value="Cable de f.o. de exterior KP holgado de 16 fo.">Cable de f.o. de exterior KP holgado de 16 fo.</option>
+                        <option value="Cable de f.o. de exterior KP holgado de 32 fo.">Cable de f.o. de exterior KP holgado de 32 fo.</option>
+                        <option value="Cable de f.o. de exterior KP holgado de 64 fo.">Cable de f.o. de exterior KP holgado de 64 fo.</option>
+                        <option value="Cable de f.o. de exterior KP holgado de 128 fo.">Cable de f.o. de exterior KP holgado de 128 fo.</option>
+                        <option value="Cable de f.o. de exterior riser de 16 fo.">Cable de f.o. de exterior riser de 16 fo.</option>
+                        <option value="Cable de f.o. de exterior riser de 32 fo.">Cable de f.o. de exterior riser de 32 fo.</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="metrosCableEntrada">Metros *</label>
+                    <input type="number" id="metrosCableEntrada" name="metros" required min="0" step="0.1" placeholder="Ej: 1000.0">
+                </div>
+                <div class="form-group">
+                    <label for="fechaCableEntrada">Fecha</label>
+                    <input type="date" id="fechaCableEntrada" name="fecha">
+                </div>
+                <div class="form-group">
+                    <label for="observacionesCableEntrada">Observaciones</label>
+                    <textarea id="observacionesCableEntrada" name="observaciones" rows="3" placeholder="Observaciones adicionales (opcional)"></textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="cerrarModalEntradaCable()">Cancelar</button>
+                    <button type="submit" class="btn btn-success">Registrar Entrada</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal para Nuevo Subconducto -->
+    <div id="modalNuevoSubconducto" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Registrar Subconducto</h2>
+                <button class="modal-close" onclick="cerrarModalSubconducto()">&times;</button>
+            </div>
+            <form id="formNuevoSubconducto" class="modal-body">
+                <div class="form-group">
+                    <label for="idObraSubconducto">ID de Obra *</label>
+                    <input type="text" id="idObraSubconducto" name="idObra" required placeholder="Ej: OBR-2024-001">
+                </div>
+                <div class="form-group">
+                    <label for="tipoSubconducto">Tipo de Subconducto *</label>
+                    <select id="tipoSubconducto" name="tipoSubconducto" required>
+                        <option value="">Seleccionar tipo de subconducto...</option>
+                        <option value="Subconducto 32mm">Subconducto 32mm</option>
+                        <option value="Subconducto 40mm">Subconducto 40mm</option>
+                        <option value="Subconducto 63mm">Subconducto 63mm</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="metrosSubconducto">Metros *</label>
+                    <input type="number" id="metrosSubconducto" name="metros" required min="0" step="0.1" placeholder="Ej: 200.0">
+                </div>
+                <div class="form-group">
+                    <label for="fechaSubconducto">Fecha</label>
+                    <input type="date" id="fechaSubconducto" name="fecha">
+                </div>
+                <div class="form-group">
+                    <label for="observacionesSubconducto">Observaciones</label>
+                    <textarea id="observacionesSubconducto" name="observaciones" rows="3" placeholder="Observaciones adicionales (opcional)"></textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="cerrarModalSubconducto()">Cancelar</button>
+                    <button type="submit" class="btn btn-secondary">Registrar Subconducto</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal para Entrada Subconducto -->
+    <div id="modalEntradaSubconducto" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Entrada de Subconducto</h2>
+                <button class="modal-close" onclick="cerrarModalEntradaSubconducto()">&times;</button>
+            </div>
+            <form id="formEntradaSubconducto" class="modal-body">
+                <div class="form-group">
+                    <label for="tipoSubconductoEntrada">Tipo de Subconducto *</label>
+                    <select id="tipoSubconductoEntrada" name="tipoSubconducto" required>
+                        <option value="">Seleccionar tipo de subconducto...</option>
+                        <option value="Subconducto 32mm">Subconducto 32mm</option>
+                        <option value="Subconducto 40mm">Subconducto 40mm</option>
+                        <option value="Subconducto 63mm">Subconducto 63mm</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="metrosSubconductoEntrada">Metros *</label>
+                    <input type="number" id="metrosSubconductoEntrada" name="metros" required min="0" step="0.1" placeholder="Ej: 500.0">
+                </div>
+                <div class="form-group">
+                    <label for="fechaSubconductoEntrada">Fecha</label>
+                    <input type="date" id="fechaSubconductoEntrada" name="fecha">
+                </div>
+                <div class="form-group">
+                    <label for="observacionesSubconductoEntrada">Observaciones</label>
+                    <textarea id="observacionesSubconductoEntrada" name="observaciones" rows="3" placeholder="Observaciones adicionales (opcional)"></textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="cerrarModalEntradaSubconducto()">Cancelar</button>
+                    <button type="submit" class="btn btn-success">Registrar Entrada</button>
+                </div>
+            </form>
         </div>
     </div>
 

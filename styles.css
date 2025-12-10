@@ -204,6 +204,68 @@ body {
   font-size: 16px;
   color: var(--neutral-600);
   line-height: 1.5;
+  margin-bottom: var(--space-md);
+}
+
+.tab-actions {
+  display: flex;
+  gap: var(--space-sm);
+  margin-top: var(--space-md);
+  flex-wrap: wrap;
+}
+
+/* ===== SECCIONES POR TIPO DE MATERIAL ===== */
+.tipo-section {
+  margin-bottom: var(--space-xl);
+  border: 1px solid var(--neutral-300);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.tipo-header {
+  background: var(--primary-100);
+  padding: var(--space-md);
+  border-bottom: 1px solid var(--neutral-300);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+}
+
+.tipo-header h3 {
+  margin: 0;
+  color: var(--neutral-900);
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.tipo-stock {
+  display: flex;
+  gap: var(--space-md);
+  flex-wrap: wrap;
+}
+
+.stock-item {
+  background: var(--surface-card);
+  padding: var(--space-xs) var(--space-sm);
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  font-weight: 500;
+  border: 1px solid var(--neutral-300);
+}
+
+.stock-item.disponible {
+  background: var(--success);
+  color: white;
+  border-color: var(--success);
+}
+
+.materiales-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: var(--space-md);
+  padding: var(--space-md);
 }
 
 /* ===== GRID DE ALBARANES ===== */
@@ -745,3 +807,90 @@ body {
 .mb-md { margin-bottom: var(--space-md); }
 .mb-lg { margin-bottom: var(--space-lg); }
 .mb-xl { margin-bottom: var(--space-xl); }
+
+/* ===== HEADER ACTIONS ===== */
+.header-actions {
+  display: flex;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+}
+
+.header-actions .btn {
+  min-width: 140px;
+}
+
+/* ===== STOCK INFO ===== */
+.stock-info {
+  margin-bottom: var(--space-xl);
+  padding: var(--space-lg);
+  background: var(--surface-card);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--neutral-300);
+}
+
+.stock-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--space-lg);
+}
+
+.stock-card {
+  text-align: center;
+  padding: var(--space-lg);
+  background: var(--background-page);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--neutral-300);
+  transition: all 200ms ease-out;
+}
+
+.stock-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.stock-number {
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--primary-500);
+  margin-bottom: var(--space-sm);
+  line-height: 1;
+}
+
+.stock-label {
+  font-size: 14px;
+  color: var(--neutral-600);
+  font-weight: 500;
+}
+
+/* ===== RESPONSIVE PARA STOCK ===== */
+@media (max-width: 768px) {
+  .header-actions {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .header-actions .btn {
+    min-width: auto;
+    width: 100%;
+  }
+
+  .stock-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-md);
+  }
+
+  .stock-card {
+    padding: var(--space-md);
+  }
+
+  .stock-number {
+    font-size: 24px;
+  }
+}
+
+@media (max-width: 480px) {
+  .stock-grid {
+    grid-template-columns: 1fr;
+  }
+}

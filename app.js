@@ -1,14 +1,19 @@
 // ===== VARIABLES GLOBALES =====
 let albaranes = [];
 let albaranSeleccionado = null;
+let cables = [];
+let subconductos = [];
 
 // ===== INICIALIZACIÓN =====
 document.addEventListener('DOMContentLoaded', function() {
     cargarAlbaranes();
+    cargarMateriales();
     configurarEventListeners();
     establecerFechaActual();
     actualizarContadores();
     mostrarAlbaranes();
+    actualizarStockDisplay('cable');
+    actualizarStockDisplay('subconducto');
 });
 
 // ===== GESTIÓN DE ALBARANES =====
@@ -32,6 +37,33 @@ function generarIdAlbaran() {
     return `ALB-${año}${mes}${dia}-${String(contador).padStart(3, '0')}`;
 }
 
+// ===== GESTIÓN DE MATERIALES =====
+function cargarMateriales() {
+    const datosCables = localStorage.getItem('cables');
+    if (datosCables) {
+        cables = JSON.parse(datosCables);
+    }
+    
+    const datosSubconductos = localStorage.getItem('subconductos');
+    if (datosSubconductos) {
+        subconductos = JSON.parse(datosSubconductos);
+    }
+}
+
+function guardarMateriales() {
+    localStorage.setItem('cables', JSON.stringify(cables));
+    localStorage.setItem('subconductos', JSON.stringify(subconductos));
+}
+
+function generarIdMaterial(tipo) {
+    const fecha = new Date();
+    const año = fecha.getFullYear();
+    const mes = String(fecha.getMonth() + 1).padStart(2, '0');
+    const dia = String(fecha.getDate()).padStart(2, '0');
+    const contador = tipo === 'cable' ? cables.length + 1 : subconductos.length + 1;
+    return `${tipo === 'cable' ? 'CAB' : 'SUB'}-${año}${mes}${dia}-${String(contador).padStart(3, '0')}`;
+}
+
 // ===== EVENT LISTENERS =====
 function configurarEventListeners() {
     // Navegación por pestañas
@@ -46,6 +78,38 @@ function configurarEventListeners() {
     document.getElementById('btnNuevoAlbaran').addEventListener('click', abrirModalNuevoAlbaran);
     document.getElementById('formNuevoAlbaran').addEventListener('submit', crearAlbaran);
 
+    // Modal nuevo cable instalación
+    document.getElementById('btnNuevoCableInstalacion').addEventListener('click', abrirModalCableInstalacion);
+    document.getElementById('formNuevoCable').addEventListener('submit', function(e) {
+        e.preventDefault();
+        agregarMaterial('cable', new FormData(e.target), 'instalacion');
+        cerrarModalCable();
+    });
+
+    // Modal entrada cable
+    document.getElementById('btnEntradaCable').addEventListener('click', abrirModalEntradaCable);
+    document.getElementById('formEntradaCable').addEventListener('submit', function(e) {
+        e.preventDefault();
+        agregarMaterial('cable', new FormData(e.target), 'entrada');
+        cerrarModalEntradaCable();
+    });
+
+    // Modal nuevo subconducto instalación
+    document.getElementById('btnNuevoSubconductoInstalacion').addEventListener('click', abrirModalSubconductoInstalacion);
+    document.getElementById('formNuevoSubconducto').addEventListener('submit', function(e) {
+        e.preventDefault();
+        agregarMaterial('subconducto', new FormData(e.target), 'instalacion');
+        cerrarModalSubconducto();
+    });
+
+    // Modal entrada subconducto
+    document.getElementById('btnEntradaSubconducto').addEventListener('click', abrirModalEntradaSubconducto);
+    document.getElementById('formEntradaSubconducto').addEventListener('submit', function(e) {
+        e.preventDefault();
+        agregarMaterial('subconducto', new FormData(e.target), 'entrada');
+        cerrarModalEntradaSubconducto();
+    });
+
     // Modal recepción
     document.querySelectorAll('input[name="estadoRecepcion"]').forEach(radio => {
         radio.addEventListener('change', toggleDetalleFaltante);
@@ -57,6 +121,10 @@ function configurarEventListeners() {
             if (e.target === modal) {
                 cerrarModal();
                 cerrarModalRecepcion();
+                cerrarModalCable();
+                cerrarModalSubconducto();
+                cerrarModalEntradaCable();
+                cerrarModalEntradaSubconducto();
             }
         });
     });
@@ -66,6 +134,10 @@ function configurarEventListeners() {
         if (e.key === 'Escape') {
             cerrarModal();
             cerrarModalRecepcion();
+            cerrarModalCable();
+            cerrarModalSubconducto();
+            cerrarModalEntradaCable();
+            cerrarModalEntradaSubconducto();
         }
     });
 }
@@ -84,18 +156,30 @@ function cambiarTab(tab) {
     });
     document.getElementById(`tab-${tab}`).classList.add('active');
 
-    // Actualizar albaranes mostrados
-    mostrarAlbaranes();
+    // Actualizar contenido mostrado
+    if (tab === 'cables') {
+        mostrarMateriales('cable');
+        actualizarStockDisplay('cable');
+    } else if (tab === 'subconductos') {
+        mostrarMateriales('subconducto');
+        actualizarStockDisplay('subconducto');
+    } else {
+        mostrarAlbaranes();
+    }
 }
 
 function actualizarContadores() {
     const pendientes = albaranes.filter(a => a.estado === 'pendiente').length;
     const recibidos = albaranes.filter(a => a.estado === 'recibido').length;
     const faltantes = albaranes.filter(a => a.estado === 'faltante').length;
+    const cableCount = cables.length;
+    const subconductoCount = subconductos.length;
 
     document.getElementById('count-pendientes').textContent = pendientes;
     document.getElementById('count-recibidos').textContent = recibidos;
     document.getElementById('count-faltantes').textContent = faltantes;
+    document.getElementById('count-cables').textContent = cableCount;
+    document.getElementById('count-subconductos').textContent = subconductoCount;
 }
 
 // ===== GESTIÓN DE ALBARANES =====
@@ -109,6 +193,7 @@ function crearAlbaran(e) {
         fecha: formData.get('fecha'),
         cuentaCargo: formData.get('cuentaCargo'),
         tipoInstalacion: formData.get('tipoInstalacion'),
+        jefeObra: formData.get('jefeObra') || '',
         observaciones: formData.get('observaciones') || '',
         estado: 'pendiente',
         fechaCreacion: new Date().toISOString(),
@@ -258,6 +343,12 @@ function crearTarjetaAlbaran(albaran) {
                     <span class="info-label">Tipo Instalación:</span>
                     <span class="info-value">${albaran.tipoInstalacion}</span>
                 </div>
+                ${albaran.jefeObra ? `
+                <div class="info-row">
+                    <span class="info-label">Jefe de Obra:</span>
+                    <span class="info-value">${albaran.jefeObra}</span>
+                </div>
+                ` : ''}
                 ${fechaRecepcionHtml}
                 ${materialFaltanteHtml}
                 ${observacionesHtml}
@@ -300,6 +391,12 @@ function abrirModalRecepcion(albaranId) {
             <span class="info-label">Tipo Instalación:</span>
             <span class="info-value">${albaranSeleccionado.tipoInstalacion}</span>
         </div>
+        ${albaranSeleccionado.jefeObra ? `
+            <div class="info-row">
+                <span class="info-label">Jefe de Obra:</span>
+                <span class="info-value">${albaranSeleccionado.jefeObra}</span>
+            </div>
+        ` : ''}
         ${albaranSeleccionado.observaciones ? `
             <div style="margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--neutral-300);">
                 <strong>Observaciones:</strong> ${albaranSeleccionado.observaciones}
@@ -363,6 +460,10 @@ function confirmarRecepcion() {
 function establecerFechaActual() {
     const hoy = new Date().toISOString().split('T')[0];
     document.getElementById('fecha').value = hoy;
+    
+    // Establecer fechas por defecto en formularios de materiales
+    document.getElementById('fechaCable').value = hoy;
+    document.getElementById('fechaSubconducto').value = hoy;
 }
 
 function mostrarToast(mensaje, tipo = 'info') {
@@ -386,7 +487,355 @@ function mostrarToast(mensaje, tipo = 'info') {
     }, 5000);
 }
 
+// ===== GESTIÓN DE CABLES Y SUBCONDUCTOS =====
+function agregarMaterial(tipo, formData, accion) {
+    const material = {
+        id: generarIdMaterial(tipo),
+        tipoMaterial: tipo,
+        idObra: formData.get('idObra') || '',
+        tipoCable: formData.get('tipoCable') || formData.get('tipoSubconducto') || '',
+        metros: parseFloat(formData.get('metros')) || 0,
+        accion: accion, // 'instalacion' o 'entrada'
+        fecha: formData.get('fecha') || new Date().toISOString().split('T')[0],
+        observaciones: formData.get('observaciones') || ''
+    };
+
+    if (tipo === 'cable') {
+        cables.push(material);
+    } else {
+        subconductos.push(material);
+    }
+    
+    guardarMateriales();
+    mostrarMateriales(tipo);
+    actualizarContadores();
+    actualizarStockDisplay(tipo);
+    
+    const tipoLabel = tipo === 'cable' ? 'Cable' : 'Subconducto';
+    const accionLabel = accion === 'instalacion' ? 'instalación' : 'entrada';
+    mostrarToast(`${tipoLabel} de ${accionLabel} agregado correctamente`, 'success');
+}
+
+// Función eliminada - ya no se usa el sistema de "solicitado"
+
+function eliminarMaterial(tipo, materialId) {
+    if (confirm('¿Estás seguro de que quieres eliminar este material?')) {
+        if (tipo === 'cable') {
+            cables = cables.filter(m => m.id !== materialId);
+        } else {
+            subconductos = subconductos.filter(m => m.id !== materialId);
+        }
+        guardarMateriales();
+        mostrarMateriales(tipo);
+        actualizarContadores();
+        actualizarStockDisplay(tipo);
+        mostrarToast('Material eliminado correctamente', 'success');
+    }
+}
+
+function mostrarMateriales(tipo) {
+    const contenedor = document.getElementById(`lista-${tipo}s`);
+    const materialArray = tipo === 'cable' ? cables : subconductos;
+    
+    if (materialArray.length === 0) {
+        contenedor.innerHTML = `
+            <div class="empty-state" style="text-align: center; padding: 60px 20px; color: var(--neutral-600);">
+                <div style="font-size: 64px; margin-bottom: 20px;">${tipo === 'cable' ? '🔌' : '🛡️'}</div>
+                <h3 style="margin-bottom: 10px; color: var(--neutral-900);">
+                    No hay ${tipo}s registrados
+                </h3>
+                <p>
+                    Los ${tipo}s utilizados en obras aparecerán aquí
+                </p>
+            </div>
+        `;
+        return;
+    }
+
+    // Agrupar materiales por tipo
+    const materialesPorTipo = {};
+    materialArray.forEach(material => {
+        const tipoMaterial = material.tipoCable || material.tipoSubconducto || 'Sin especificar';
+        if (!materialesPorTipo[tipoMaterial]) {
+            materialesPorTipo[tipoMaterial] = [];
+        }
+        materialesPorTipo[tipoMaterial].push(material);
+    });
+
+    // Crear HTML con secciones por tipo
+    let html = '';
+    Object.keys(materialesPorTipo).sort().forEach(tipoMaterial => {
+        const materiales = materialesPorTipo[tipoMaterial];
+        const stock = calcularStockPorTipo(tipo === 'cable' ? 'cable' : 'subconducto')[tipoMaterial] || {recibido: 0, instalado: 0, disponible: 0};
+        
+        html += `
+            <div class="tipo-section">
+                <div class="tipo-header">
+                    <h3>${tipoMaterial}</h3>
+                    <div class="tipo-stock">
+                        <span class="stock-item">Recibido: ${stock.recibido.toFixed(1)}m</span>
+                        <span class="stock-item">Instalado: ${stock.instalado.toFixed(1)}m</span>
+                        <span class="stock-item disponible">Disponible: ${stock.disponible.toFixed(1)}m</span>
+                    </div>
+                </div>
+                <div class="materiales-grid">
+                    ${materiales.map(material => crearTarjetaMaterial(material)).join('')}
+                </div>
+            </div>
+        `;
+    });
+
+    contenedor.innerHTML = html;
+}
+
+function crearTarjetaMaterial(material) {
+    const fechaFormateada = new Date(material.fecha).toLocaleDateString('es-ES');
+    
+    let estadoClass = '';
+    let estadoText = '';
+    
+    if (material.accion === 'entrada') {
+        estadoClass = 'status-recibido';
+        estadoText = 'Entrada';
+    } else if (material.accion === 'instalacion') {
+        estadoClass = 'status-faltante';
+        estadoText = 'Instalado';
+    }
+
+    let observacionesHtml = '';
+    if (material.observaciones) {
+        observacionesHtml = `
+            <div class="observaciones">
+                <strong>Observaciones:</strong> ${material.observaciones}
+            </div>
+        `;
+    }
+
+    let tipoHtml = '';
+    if (material.tipoCable) {
+        tipoHtml = `
+            <div class="info-row">
+                <span class="info-label">Tipo:</span>
+                <span class="info-value">${material.tipoCable}</span>
+            </div>
+        `;
+    }
+
+    let idObraHtml = '';
+    if (material.idObra) {
+        idObraHtml = `
+            <div class="info-row">
+                <span class="info-label">ID Obra:</span>
+                <span class="info-value">${material.idObra}</span>
+            </div>
+        `;
+    }
+
+    return `
+        <div class="albaran-card">
+            <div class="albaran-header">
+                <div class="albaran-id">${material.id}</div>
+                <div class="status-badge ${estadoClass}">${estadoText}</div>
+            </div>
+            <div class="albaran-info">
+                ${idObraHtml}
+                ${tipoHtml}
+                <div class="info-row">
+                    <span class="info-label">Metros:</span>
+                    <span class="info-value">${material.metros} m</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Fecha:</span>
+                    <span class="info-value">${fechaFormateada}</span>
+                </div>
+                ${observacionesHtml}
+            </div>
+            <div class="albaran-actions">
+                <button class="btn btn-secondary" onclick="eliminarMaterial('${material.tipoMaterial}', '${material.id}')">
+                    🗑️ Eliminar
+                </button>
+            </div>
+        </div>
+    `;
+}
+
+function calcularStock(tipo) {
+    const materialArray = tipo === 'cable' ? cables : subconductos;
+    
+    let totalRecibido = 0;
+    let totalInstalado = 0;
+    
+    materialArray.forEach(material => {
+        if (material.accion === 'entrada') {
+            totalRecibido += material.metros;
+        } else if (material.accion === 'instalacion') {
+            totalInstalado += material.metros;
+        }
+    });
+    
+    return {
+        recibido: totalRecibido,
+        instalado: totalInstalado,
+        disponible: totalRecibido - totalInstalado
+    };
+}
+
+function calcularStockPorTipo(tipoMaterial) {
+    const materialArray = tipoMaterial === 'cable' ? cables : subconductos;
+    const stockPorTipo = {};
+    
+    // Obtener todos los tipos únicos
+    const tipos = [...new Set(materialArray.map(m => m.tipoCable || m.tipoSubconducto))];
+    
+    tipos.forEach(tipo => {
+        const materialesDelTipo = materialArray.filter(m => (m.tipoCable || m.tipoSubconducto) === tipo);
+        
+        let totalRecibido = 0;
+        let totalInstalado = 0;
+        
+        materialesDelTipo.forEach(material => {
+            if (material.accion === 'entrada') {
+                totalRecibido += material.metros;
+            } else if (material.accion === 'instalacion') {
+                totalInstalado += material.metros;
+            }
+        });
+        
+        stockPorTipo[tipo] = {
+            recibido: totalRecibido,
+            instalado: totalInstalado,
+            disponible: totalRecibido - totalInstalado
+        };
+    });
+    
+    return stockPorTipo;
+}
+
 // ===== REPORTES PDF =====
+function generarReporteMateriales(tipoMaterial) {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+
+    // Configurar fuentes
+    doc.setFont('helvetica');
+    
+    // Header
+    doc.setFontSize(20);
+    doc.setTextColor(255, 85, 0); // Color primario
+    doc.text('Redes Carreras S.L.', 20, 30);
+    
+    doc.setFontSize(16);
+    doc.setTextColor(0, 0, 0);
+    doc.text(`Control de ${tipoMaterial === 'cable' ? 'Cables' : 'Subconductos'}`, 20, 45);
+    
+    doc.setFontSize(12);
+    doc.setTextColor(100, 100, 100);
+    const fechaReporte = new Date().toLocaleDateString('es-ES');
+    doc.text(`Fecha del reporte: ${fechaReporte}`, 20, 55);
+    
+    let yPos = 75;
+    
+    const materialArray = tipoMaterial === 'cable' ? cables : subconductos;
+    const stockPorTipo = calcularStockPorTipo(tipoMaterial);
+    
+    // Resumen por tipo
+    doc.setFontSize(14);
+    doc.setTextColor(0, 0, 0);
+    doc.text('Stock por Tipo', 20, yPos);
+    yPos += 15;
+    
+    Object.keys(stockPorTipo).forEach(tipo => {
+        const stock = stockPorTipo[tipo];
+        if (yPos > 250) {
+            doc.addPage();
+            yPos = 30;
+        }
+        
+        doc.setFontSize(10);
+        doc.setTextColor(255, 85, 0);
+        doc.text(`${tipo}:`, 25, yPos);
+        yPos += 6;
+        
+        doc.setTextColor(0, 0, 0);
+        doc.text(`Recibidos: ${stock.recibido.toFixed(1)}m | Instalados: ${stock.instalado.toFixed(1)}m | Disponibles: ${stock.disponible.toFixed(1)}m`, 30, yPos);
+        yPos += 10;
+    });
+    
+    yPos += 15;
+    
+    // Tabla detallada
+    if (materialArray.length > 0) {
+        doc.setFontSize(14);
+        doc.setTextColor(0, 0, 0);
+        doc.text('Detalle de Movimientos', 20, yPos);
+        yPos += 15;
+        
+        // Headers
+        doc.setFontSize(10);
+        doc.setTextColor(255, 255, 255);
+        doc.setFillColor(255, 85, 0);
+        doc.rect(20, yPos - 8, 170, 8, 'F');
+        
+        doc.text('ID', 22, yPos - 2);
+        doc.text('Tipo', 45, yPos - 2);
+        doc.text('Acción', 100, yPos - 2);
+        doc.text('Metros', 130, yPos - 2);
+        doc.text('Fecha', 155, yPos - 2);
+        doc.text('Obra', 180, yPos - 2);
+        
+        yPos += 12;
+        
+        // Datos
+        doc.setTextColor(0, 0, 0);
+        materialArray.forEach((material, index) => {
+            if (yPos > 250) {
+                doc.addPage();
+                yPos = 30;
+            }
+            
+            // Alternar colores de fondo
+            if (index % 2 === 0) {
+                doc.setFillColor(245, 241, 230);
+                doc.rect(20, yPos - 8, 170, 8, 'F');
+            }
+            
+            const tipo = material.tipoCable || material.tipoSubconducto || 'N/A';
+            const accion = material.accion === 'entrada' ? 'Entrada' : 'Instalación';
+            const fecha = new Date(material.fecha).toLocaleDateString('es-ES');
+            const obra = material.idObra || '-';
+            
+            // Ajustar texto
+            const tipoText = tipo.length > 20 ? tipo.substring(0, 20) + '...' : tipo;
+            const obraText = obra.length > 8 ? obra.substring(0, 8) + '...' : obra;
+            
+            doc.text(material.id, 22, yPos - 2);
+            doc.text(tipoText, 45, yPos - 2);
+            doc.text(accion, 100, yPos - 2);
+            doc.text(`${material.metros}m`, 130, yPos - 2);
+            doc.text(fecha, 155, yPos - 2);
+            doc.text(obraText, 180, yPos - 2);
+            
+            yPos += 8;
+        });
+    }
+    
+    // Footer
+    const pageCount = doc.internal.getNumberOfPages();
+    for (let i = 1; i <= pageCount; i++) {
+        doc.setPage(i);
+        doc.setFontSize(8);
+        doc.setTextColor(150, 150, 150);
+        doc.text('Generado por Sistema de Control de Materiales - Redes Carreras S.L.', 20, 290);
+        doc.text(`Página ${i} de ${pageCount}`, 170, 290);
+    }
+    
+    // Descargar
+    const nombreArchivo = `reporte_${tipoMaterial}s_${fechaReporte.replace(/\//g, '-')}.pdf`;
+    doc.save(nombreArchivo);
+    
+    mostrarToast(`Reporte de ${tipoMaterial === 'cable' ? 'cables' : 'subconductos'} generado correctamente`, 'success');
+}
+
 function generarReporte(tipo) {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
@@ -458,12 +907,17 @@ function generarReporte(tipo) {
             const estado = albaran.estado === 'pendiente' ? 'Pendiente' : 
                           albaran.estado === 'recibido' ? 'Recibido' : 'Faltante';
             
-            doc.text(albaran.id.substring(0, 10), 22, yPos - 2);
-            doc.text(albaran.idObra.substring(0, 12), 55, yPos - 2);
+            // Ajustar texto para que quepa en las columnas
+            const idText = albaran.id.length > 12 ? albaran.id.substring(0, 12) + '...' : albaran.id;
+            const obraText = albaran.idObra.length > 10 ? albaran.idObra.substring(0, 10) + '...' : albaran.idObra;
+            const cuentaText = albaran.cuentaCargo.length > 8 ? albaran.cuentaCargo.substring(0, 8) + '...' : albaran.cuentaCargo;
+            
+            doc.text(idText, 22, yPos - 2);
+            doc.text(obraText, 55, yPos - 2);
             doc.text(fecha, 85, yPos - 2);
             doc.text(albaran.tipoInstalacion, 110, yPos - 2);
             doc.text(estado, 135, yPos - 2);
-            doc.text(albaran.cuentaCargo.substring(0, 10), 160, yPos - 2);
+            doc.text(cuentaText, 160, yPos - 2);
             
             yPos += 8;
         });
@@ -519,6 +973,14 @@ function generarReporte(tipo) {
             }
             break;
             
+        case 'cables':
+            generarReporteMateriales('cable');
+            break;
+            
+        case 'subconductos':
+            generarReporteMateriales('subconducto');
+            break;
+            
         case 'completo':
             // Resumen general
             doc.setFontSize(14);
@@ -563,4 +1025,75 @@ function generarReporte(tipo) {
     doc.save(nombreArchivo);
     
     mostrarToast('Reporte generado y descargado correctamente', 'success');
+}
+
+// ===== FUNCIONES MODALES MATERIALES =====
+function abrirModalCableInstalacion() {
+    document.getElementById('modalNuevoCable').classList.add('active');
+    document.getElementById('idObraCable').focus();
+    establecerFechaActualMaterial('Cable');
+}
+
+function cerrarModalCable() {
+    document.getElementById('modalNuevoCable').classList.remove('active');
+    document.getElementById('formNuevoCable').reset();
+}
+
+function abrirModalEntradaCable() {
+    document.getElementById('modalEntradaCable').classList.add('active');
+    document.getElementById('tipoCableEntrada').focus();
+    establecerFechaActualMaterial('CableEntrada');
+}
+
+function cerrarModalEntradaCable() {
+    document.getElementById('modalEntradaCable').classList.remove('active');
+    document.getElementById('formEntradaCable').reset();
+}
+
+function abrirModalSubconductoInstalacion() {
+    document.getElementById('modalNuevoSubconducto').classList.add('active');
+    document.getElementById('idObraSubconducto').focus();
+    establecerFechaActualMaterial('Subconducto');
+}
+
+function cerrarModalSubconducto() {
+    document.getElementById('modalNuevoSubconducto').classList.remove('active');
+    document.getElementById('formNuevoSubconducto').reset();
+}
+
+function abrirModalEntradaSubconducto() {
+    document.getElementById('modalEntradaSubconducto').classList.add('active');
+    document.getElementById('tipoSubconductoEntrada').focus();
+    establecerFechaActualMaterial('SubconductoEntrada');
+}
+
+function cerrarModalEntradaSubconducto() {
+    document.getElementById('modalEntradaSubconducto').classList.remove('active');
+    document.getElementById('formEntradaSubconducto').reset();
+}
+
+function establecerFechaActualMaterial(tipo) {
+    const hoy = new Date().toISOString().split('T')[0];
+    const elementos = [
+        `fechaCable`,
+        `fechaSubconducto`, 
+        `fechaCableEntrada`,
+        `fechaSubconductoEntrada`
+    ];
+    
+    elementos.forEach(elemento => {
+        const elementoDOM = document.getElementById(elemento);
+        if (elementoDOM) {
+            elementoDOM.value = hoy;
+        }
+    });
+}
+
+function actualizarStockDisplay(tipo) {
+    const stock = calcularStock(tipo);
+    const prefijo = tipo === 'cable' ? 'cable' : 'subconducto';
+    
+    document.getElementById(`${prefijo}-recibido`).textContent = stock.recibido.toFixed(1);
+    document.getElementById(`${prefijo}-instalado`).textContent = stock.instalado.toFixed(1);
+    document.getElementById(`${prefijo}-disponible`).textContent = stock.disponible.toFixed(1);
 }
