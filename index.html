@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Control de Materiales - Redes Carreras S.L.</title>
+    
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#FF5500">
+    <meta name="description" content="Sistema de gestión de albaranes y control de materiales para Redes Carreras S.L.">
+    <meta name="keywords" content="albaranes, materiales, control, redes, telecomunicaciones, FTTH, FTTN, TESA">
+    <meta name="author" content="Redes Carreras S.L.">
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="manifest.json">
+    
+    <!-- PWA Icons -->
+    <link rel="icon" type="image/png" sizes="72x72" href="icons/icon-72x72.png">
+    <link rel="icon" type="image/png" sizes="96x96" href="icons/icon-96x96.png">
+    <link rel="icon" type="image/png" sizes="128x128" href="icons/icon-128x128.png">
+    <link rel="icon" type="image/png" sizes="144x144" href="icons/icon-144x144.png">
+    <link rel="icon" type="image/png" sizes="152x152" href="icons/icon-152x152.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192x192.png">
+    <link rel="icon" type="image/png" sizes="384x384" href="icons/icon-384x384.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="icons/icon-512x512.png">
+    <link rel="apple-touch-icon" href="icons/icon-152x152.png">
+    
+    <!-- Microsoft Tiles -->
+    <meta name="msapplication-TileImage" content="icons/icon-144x144.png">
+    <meta name="msapplication-TileColor" content="#FF5500">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <div class="logo-container">
+                <img src="logo-redes_Transparente-216x216.png" alt="Redes Carreras S.L." class="logo">
+                <div class="company-info">
+                    <h1>Control de Materiales</h1>
+                    <p class="subtitle">Redes Carreras S.L. - Telecomunicaciones</p>
+                </div>
+            </div>
+            <button id="btnNuevoAlbaran" class="btn btn-primary">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+                Nuevo Albarán
+            </button>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <div class="container">
+            <!-- Tabs Navigation -->
+            <div class="tabs-container">
+                <button class="tab-btn active" data-tab="pendientes">
+                    <span class="tab-icon">📋</span>
+                    Pendientes <span id="count-pendientes" class="count-badge">0</span>
+                </button>
+                <button class="tab-btn" data-tab="recibidos">
+                    <span class="tab-icon">✅</span>
+                    Recibidos <span id="count-recibidos" class="count-badge">0</span>
+                </button>
+                <button class="tab-btn" data-tab="faltantes">
+                    <span class="tab-icon">⚠️</span>
+                    Material Faltante <span id="count-faltantes" class="count-badge">0</span>
+                </button>
+                <button class="tab-btn" data-tab="reportes">
+                    <span class="tab-icon">📊</span>
+                    Reportes
+                </button>
+            </div>
+
+            <!-- Tab Content -->
+            <div id="tab-content">
+                <!-- Pendientes Tab -->
+                <div id="tab-pendientes" class="tab-content active">
+                    <div class="tab-header">
+                        <h2>Albaranes Pendientes de Recibir</h2>
+                        <p class="tab-description">Lista de albaranes que aún no han sido confirmados como recibidos</p>
+                    </div>
+                    <div id="lista-pendientes" class="albaranes-grid">
+                        <!-- Los albaranes se cargarán aquí dinámicamente -->
+                    </div>
+                </div>
+
+                <!-- Recibidos Tab -->
+                <div id="tab-recibidos" class="tab-content">
+                    <div class="tab-header">
+                        <h2>Albaranes Recibidos</h2>
+                        <p class="tab-description">Albaranes confirmados como entregados correctamente</p>
+                    </div>
+                    <div id="lista-recibidos" class="albaranes-grid">
+                        <!-- Los albaranes se cargarán aquí dinámicamente -->
+                    </div>
+                </div>
+
+                <!-- Faltantes Tab -->
+                <div id="tab-faltantes" class="tab-content">
+                    <div class="tab-header">
+                        <h2>Material Faltante</h2>
+                        <p class="tab-description">Albaranes donde se recibió material incompleto</p>
+                    </div>
+                    <div id="lista-faltantes" class="albaranes-grid">
+                        <!-- Los albaranes se cargarán aquí dinámicamente -->
+                    </div>
+                </div>
+
+                <!-- Reportes Tab -->
+                <div id="tab-reportes" class="tab-content">
+                    <div class="tab-header">
+                        <h2>Reportes y Exportación</h2>
+                        <p class="tab-description">Genera y descarga reportes de los albaranes</p>
+                    </div>
+                    <div class="reportes-container">
+                        <div class="reportes-grid">
+                            <div class="reporte-card">
+                                <div class="reporte-icon">📋</div>
+                                <h3>Albaranes Pendientes</h3>
+                                <p>Reporte completo de albaranes que aún no han sido recibidos</p>
+                                <button class="btn btn-primary" onclick="generarReporte('pendientes')">
+                                    Descargar PDF
+                                </button>
+                            </div>
+                            <div class="reporte-card">
+                                <div class="reporte-icon">✅</div>
+                                <h3>Albaranes Recibidos</h3>
+                                <p>Reporte de albaranes entregados correctamente</p>
+                                <button class="btn btn-primary" onclick="generarReporte('recibidos')">
+                                    Descargar PDF
+                                </button>
+                            </div>
+                            <div class="reporte-card">
+                                <div class="reporte-icon">⚠️</div>
+                                <h3>Material Faltante</h3>
+                                <p>Reporte de albaranes con material incompleto</p>
+                                <button class="btn btn-primary" onclick="generarReporte('faltantes')">
+                                    Descargar PDF
+                                </button>
+                            </div>
+                            <div class="reporte-card">
+                                <div class="reporte-icon">📊</div>
+                                <h3>Reporte Completo</h3>
+                                <p>Resumen general de todos los albaranes</p>
+                                <button class="btn btn-primary" onclick="generarReporte('completo')">
+                                    Descargar PDF
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal para Nuevo Albarán -->
+    <div id="modalNuevoAlbaran" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Crear Nuevo Albarán</h2>
+                <button class="modal-close" onclick="cerrarModal()">&times;</button>
+            </div>
+            <form id="formNuevoAlbaran" class="modal-body">
+                <div class="form-group">
+                    <label for="idObra">ID de Obra *</label>
+                    <input type="text" id="idObra" name="idObra" required placeholder="Ej: OBR-2024-001">
+                </div>
+                <div class="form-group">
+                    <label for="fecha">Fecha *</label>
+                    <input type="date" id="fecha" name="fecha" required>
+                </div>
+                <div class="form-group">
+                    <label for="cuentaCargo">Cuenta de Cargo *</label>
+                    <input type="text" id="cuentaCargo" name="cuentaCargo" required placeholder="Ej: CC-001-2024">
+                </div>
+                <div class="form-group">
+                    <label for="tipoInstalacion">Tipo de Instalación *</label>
+                    <select id="tipoInstalacion" name="tipoInstalacion" required>
+                        <option value="">Seleccionar tipo...</option>
+                        <option value="FTTH">FTTH (Fiber To The Home)</option>
+                        <option value="FTTN">FTTN (Fiber To The Node)</option>
+                        <option value="TESA">TESA (Telecomunicaciones)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="observaciones">Observaciones</label>
+                    <textarea id="observaciones" name="observaciones" rows="3" placeholder="Observaciones adicionales (opcional)"></textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="cerrarModal()">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Crear Albarán</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal para Confirmar Recepción -->
+    <div id="modalRecepcion" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Confirmar Recepción de Material</h2>
+                <button class="modal-close" onclick="cerrarModalRecepcion()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="infoAlbaranRecepcion" class="albaran-info-modal">
+                    <!-- Información del albarán se cargará aquí -->
+                </div>
+                <div class="recepcion-options">
+                    <h3>Estado de la Recepción</h3>
+                    <div class="radio-group">
+                        <label class="radio-option">
+                            <input type="radio" name="estadoRecepcion" value="completo" checked>
+                            <span class="radio-custom"></span>
+                            <div class="radio-content">
+                                <strong>✅ Entregado Correctamente</strong>
+                                <p>Todo el material ha sido recibido según lo especificado</p>
+                            </div>
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="estadoRecepcion" value="incompleto">
+                            <span class="radio-custom"></span>
+                            <div class="radio-content">
+                                <strong>⚠️ Faltó Material</strong>
+                                <p>Algunos elementos no fueron recibidos</p>
+                            </div>
+                        </label>
+                    </div>
+                    <div id="detalleFaltante" class="form-group" style="display: none;">
+                        <label for="materialFaltante">Detalle del Material Faltante</label>
+                        <textarea id="materialFaltante" rows="3" placeholder="Especifique qué material faltó..."></textarea>
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="cerrarModalRecepcion()">Cancelar</button>
+                    <button type="button" class="btn btn-success" onclick="confirmarRecepcion()">Confirmar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast notifications -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <script src="app.js"></script>
+    
+    <!-- Service Worker Registration -->
+    <script>
+        // Registrar Service Worker para PWA
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+                console.log('🔧 Registrando Service Worker...');
+                navigator.serviceWorker.register('sw.js')
+                    .then(function(registration) {
+                        console.log('✅ Service Worker registrado correctamente:', registration.scope);
+                        
+                        // Verificar actualizaciones
+                        registration.addEventListener('updatefound', function() {
+                            const newWorker = registration.installing;
+                            console.log('🔄 Nueva versión del Service Worker encontrada');
+                            
+                            newWorker.addEventListener('statechange', function() {
+                                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                    // Nueva versión disponible
+                                    console.log('🆕 Nueva versión disponible. Actualiza la página.');
+                                    
+                                    // Mostrar notificación de actualización
+                                    if (confirm('🆕 Nueva versión disponible. ¿Desea actualizar ahora?')) {
+                                        newWorker.postMessage({ type: 'SKIP_WAITING' });
+                                        window.location.reload();
+                                    }
+                                }
+                            });
+                        });
+                    })
+                    .catch(function(error) {
+                        console.error('❌ Error registrando Service Worker:', error);
+                    });
+            });
+            
+            // Escuchar mensajes del Service Worker
+            navigator.serviceWorker.addEventListener('message', function(event) {
+                console.log('📨 Mensaje del Service Worker:', event.data);
+                
+                if (event.data && event.data.type === 'CACHE_UPDATED') {
+                    console.log('✅ Cache actualizado correctamente');
+                }
+            });
+        }
+        
+        // Detectar si la app está instalada
+        window.addEventListener('beforeinstallprompt', function(e) {
+            console.log('💾 App puede ser instalada');
+            // Prevent the mini-infobar from appearing on mobile
+            e.preventDefault();
+            // Store the event so it can be triggered later
+            window.deferredPrompt = e;
+            
+            // Mostrar botón de instalación personalizado si se desea
+            showInstallPromotion();
+        });
+        
+        function showInstallPromotion() {
+            // Esta función puede mostrar un botón personalizado para instalar
+            console.log('💡 Prompt de instalación disponible');
+        }
+        
+        // App instalada exitosamente
+        window.addEventListener('appinstalled', function(e) {
+            console.log('🎉 App instalada correctamente');
+            window.deferredPrompt = null;
+        });
+        
+        // Detectar cuando la app está ejecutándose como PWA
+        if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true) {
+            console.log('🚀 App ejecutándose como PWA');
+        }
+    </script>
+</body>
+</html>

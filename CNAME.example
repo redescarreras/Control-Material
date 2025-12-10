@@ -1,0 +1,11 @@
+# Configuración para GitHub Pages
+
+# Este archivo se puede usar para configurar la base del sitio
+# Descomenta la línea siguiente si el repositorio está en un subdirectorio
+# /nombre-del-repositorio
+
+# Para usar un dominio personalizado, crear un archivo CNAME con el dominio
+# Por ejemplo: ejemplo.com
+
+# Para habilitar HTTPS automático, el repositorio debe estar en una cuenta de usuario
+# o organización, no en un subdirectorio de una organización
