@@ -638,17 +638,6 @@
                     <input type="text" id="idObraDevolucion" name="idObra" required placeholder="Ej: OBR-2024-001">
                 </div>
                 <div class="form-group">
-                    <label for="metrosBobina">Metros de la Bobina *</label>
-                    <input type="number" id="metrosBobina" name="metrosBobina" required min="0" step="0.1" placeholder="Ej: 2000.0">
-                </div>
-                <div class="form-group">
-                    <label class="checkbox-label">
-                        <input type="checkbox" id="entregaVacia" name="entregaVacia">
-                        <span class="checkbox-custom"></span>
-                        Entrega Vacía
-                    </label>
-                </div>
-                <div class="form-group">
                     <label for="fechaDevolucion">Fecha de Entrega *</label>
                     <input type="date" id="fechaDevolucion" name="fecha" required>
                 </div>
@@ -661,33 +650,21 @@
                         <option value="TESA">TESA (Telecomunicaciones)</option>
                     </select>
                 </div>
+
+                <div class="bobinas-container" id="bobinasContainer">
+                    <!-- Las bobinas se añadirán dinámicamente aquí -->
+                </div>
+
                 <div class="form-group">
-                    <label for="tipoMaterialDevolucion">Tipo de Material a Devolver *</label>
-                    <select id="tipoMaterialDevolucion" name="tipoMaterial" required>
-                        <option value="">Seleccionar tipo de material...</option>
-                        <option value="bobina_con_cable">Bobinas con cable</option>
-                        <option value="bobina_vacia">Bobina vacía</option>
-                        <option value="otro">Otro tipo de material</option>
-                    </select>
+                    <button type="button" class="btn btn-secondary" id="btnAgregarBobina" onclick="agregarBobina()">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="12" y1="5" x2="12" y2="19"></line>
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                        </svg>
+                        + Añadir otra bobina
+                    </button>
                 </div>
-                <div id="camposBobinaCable" class="form-group" style="display: none;">
-                    <div class="form-group">
-                        <label for="numeroMatriculaCable">Número de Matrícula *</label>
-                        <input type="text" id="numeroMatriculaCable" name="numeroMatriculaCable" placeholder="Ej: MAT-001-2024">
-                    </div>
-                    <div class="form-group">
-                        <label for="metrosCableBobina">Metros de Cable *</label>
-                        <input type="number" id="metrosCableBobina" name="metrosCableBobina" min="0" step="0.1" placeholder="Ej: 1800.5">
-                    </div>
-                </div>
-                <div id="camposBobinaVacia" class="form-group" style="display: none;">
-                    <label for="numeroMatriculaVacia">Número de Matrícula *</label>
-                    <input type="text" id="numeroMatriculaVacia" name="numeroMatriculaVacia" placeholder="Ej: MAT-002-2024">
-                </div>
-                <div id="camposOtroMaterial" class="form-group" style="display: none;">
-                    <label for="descripcionOtroMaterial">Descripción del Material *</label>
-                    <input type="text" id="descripcionOtroMaterial" name="descripcionOtroMaterial" required placeholder="Ej: Cables de conexión, conectores, etc.">
-                </div>
+
                 <div class="form-group">
                     <label for="observacionesDevolucion">Observaciones</label>
                     <textarea id="observacionesDevolucion" name="observaciones" rows="3" placeholder="Observaciones adicionales (opcional)"></textarea>

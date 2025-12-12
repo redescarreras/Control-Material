@@ -522,23 +522,231 @@ function mostrarToast(mensaje, tipo = 'info') {
     }, 5000);
 }
 
-// ===== GESTIÓN DE DEVOLUCIONES =====
+// ===== GESTIÓN DE DEVOLUCIONES MÚLTIPLES =====
+function inicializarBobinas() {
+    const container = document.getElementById('bobinasContainer');
+    container.innerHTML = '';
+    agregarBobina(); // Añadir la primera bobina por defecto
+}
+
+function agregarBobina() {
+    const container = document.getElementById('bobinasContainer');
+    const bobinaIndex = container.children.length + 1;
+    
+    const bobinaHTML = `
+        <div class="bobina-item" data-bobina="${bobinaIndex}">
+            <div class="bobina-header">
+                <div class="bobina-title">Bobina ${bobinaIndex}</div>
+                ${bobinaIndex > 1 ? `<button type="button" class="btn-eliminar-bobina" onclick="eliminarBobina(${bobinaIndex})">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                    Eliminar
+                </button>` : ''}
+            </div>
+            <div class="campos-bobina">
+                <div class="form-group">
+                    <label for="metrosBobina_${bobinaIndex}">Metros de la Bobina *</label>
+                    <input type="number" id="metrosBobina_${bobinaIndex}" name="metrosBobina_${bobinaIndex}" required min="0" step="0.1" placeholder="Ej: 2000.0">
+                </div>
+                <div class="form-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="entregaVacia_${bobinaIndex}" name="entregaVacia_${bobinaIndex}">
+                        <span class="checkbox-custom"></span>
+                        Entrega Vacía
+                    </label>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="tipoMaterial_${bobinaIndex}">Tipo de Material a Devolver *</label>
+                <select id="tipoMaterial_${bobinaIndex}" name="tipoMaterial_${bobinaIndex}" required onchange="toggleCamposMaterial(${bobinaIndex})">
+                    <option value="">Seleccionar tipo de material...</option>
+                    <option value="bobina_con_cable">Bobinas con cable</option>
+                    <option value="bobina_vacia">Bobina vacía</option>
+                    <option value="otro">Otro tipo de material</option>
+                </select>
+            </div>
+            <div id="camposBobinaCable_${bobinaIndex}" class="campos-bobina" style="display: none;">
+                <div class="form-group">
+                    <label for="numeroMatriculaCable_${bobinaIndex}">Número de Matrícula *</label>
+                    <input type="text" id="numeroMatriculaCable_${bobinaIndex}" name="numeroMatriculaCable_${bobinaIndex}" placeholder="Ej: MAT-001-2024">
+                </div>
+                <div class="form-group">
+                    <label for="metrosCable_${bobinaIndex}">Metros de Cable *</label>
+                    <input type="number" id="metrosCable_${bobinaIndex}" name="metrosCable_${bobinaIndex}" min="0" step="0.1" placeholder="Ej: 1800.5">
+                </div>
+            </div>
+            <div id="camposBobinaVacia_${bobinaIndex}" class="form-group" style="display: none;">
+                <label for="numeroMatriculaVacia_${bobinaIndex}">Número de Matrícula *</label>
+                <input type="text" id="numeroMatriculaVacia_${bobinaIndex}" name="numeroMatriculaVacia_${bobinaIndex}" placeholder="Ej: MAT-002-2024">
+            </div>
+            <div id="camposOtroMaterial_${bobinaIndex}" class="form-group" style="display: none;">
+                <label for="descripcionOtroMaterial_${bobinaIndex}">Descripción del Material *</label>
+                <input type="text" id="descripcionOtroMaterial_${bobinaIndex}" name="descripcionOtroMaterial_${bobinaIndex}" placeholder="Ej: Cables de conexión, conectores, etc.">
+            </div>
+        </div>
+    `;
+    
+    container.insertAdjacentHTML('beforeend', bobinaHTML);
+}
+
+function eliminarBobina(bobinaIndex) {
+    const container = document.getElementById('bobinasContainer');
+    const bobinaItem = container.querySelector(`[data-bobina="${bobinaIndex}"]`);
+    if (bobinaItem) {
+        bobinaItem.remove();
+        // Renumerar las bobinas restantes
+        renumerarBobinas();
+    }
+}
+
+function renumerarBobinas() {
+    const container = document.getElementById('bobinasContainer');
+    const bobinas = container.querySelectorAll('.bobina-item');
+    
+    bobinas.forEach((bobina, index) => {
+        const nuevoNumero = index + 1;
+        bobina.setAttribute('data-bobina', nuevoNumero);
+        
+        // Actualizar título
+        const titulo = bobina.querySelector('.bobina-title');
+        titulo.textContent = `Bobina ${nuevoNumero}`;
+        
+        // Actualizar botón eliminar
+        const botonEliminar = bobina.querySelector('.btn-eliminar-bobina');
+        if (botonEliminar) {
+            botonEliminar.setAttribute('onclick', `eliminarBobina(${nuevoNumero})`);
+        } else if (nuevoNumero > 1) {
+            // Añadir botón eliminar si no existe
+            const header = bobina.querySelector('.bobina-header');
+            const botonHTML = `
+                <button type="button" class="btn-eliminar-bobina" onclick="eliminarBobina(${nuevoNumero})">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                    Eliminar
+                </button>
+            `;
+            header.insertAdjacentHTML('beforeend', botonHTML);
+        }
+        
+        // Actualizar IDs y names de todos los elementos
+        const elementos = bobina.querySelectorAll('[id], [name]');
+        elementos.forEach(elemento => {
+            const id = elemento.id;
+            const name = elemento.name;
+            
+            if (id && id.includes('_')) {
+                const partes = id.split('_');
+                partes[partes.length - 1] = nuevoNumero;
+                elemento.id = partes.join('_');
+            }
+            
+            if (name && name.includes('_')) {
+                const partes = name.split('_');
+                partes[partes.length - 1] = nuevoNumero;
+                elemento.name = partes.join('_');
+            }
+        });
+    });
+}
+
+function toggleCamposMaterial(bobinaIndex) {
+    const tipoMaterial = document.getElementById(`tipoMaterial_${bobinaIndex}`).value;
+    
+    // Ocultar todos los campos
+    document.getElementById(`camposBobinaCable_${bobinaIndex}`).style.display = 'none';
+    document.getElementById(`camposBobinaVacia_${bobinaIndex}`).style.display = 'none';
+    document.getElementById(`camposOtroMaterial_${bobinaIndex}`).style.display = 'none';
+    
+    // Limpiar valores
+    document.getElementById(`numeroMatriculaCable_${bobinaIndex}`).value = '';
+    document.getElementById(`metrosCable_${bobinaIndex}`).value = '';
+    document.getElementById(`numeroMatriculaVacia_${bobinaIndex}`).value = '';
+    document.getElementById(`descripcionOtroMaterial_${bobinaIndex}`).value = '';
+    
+    // Mostrar campos según la selección
+    switch(tipoMaterial) {
+        case 'bobina_con_cable':
+            document.getElementById(`camposBobinaCable_${bobinaIndex}`).style.display = 'grid';
+            document.getElementById(`numeroMatriculaCable_${bobinaIndex}`).required = true;
+            document.getElementById(`metrosCable_${bobinaIndex}`).required = true;
+            break;
+        case 'bobina_vacia':
+            document.getElementById(`camposBobinaVacia_${bobinaIndex}`).style.display = 'block';
+            document.getElementById(`numeroMatriculaVacia_${bobinaIndex}`).required = true;
+            break;
+        case 'otro':
+            document.getElementById(`camposOtroMaterial_${bobinaIndex}`).style.display = 'block';
+            document.getElementById(`descripcionOtroMaterial_${bobinaIndex}`).required = true;
+            break;
+    }
+}
+
 function crearDevolucion(e) {
     e.preventDefault();
     
     const formData = new FormData(e.target);
+    const container = document.getElementById('bobinasContainer');
+    const bobinas = container.querySelectorAll('.bobina-item');
+    
+    if (bobinas.length === 0) {
+        mostrarToast('Debe añadir al menos una bobina', 'error');
+        return;
+    }
+    
+    // Recopilar datos de todas las bobinas
+    const bobinasData = [];
+    
+    bobinas.forEach((bobina, index) => {
+        const bobinaIndex = index + 1;
+        const metrosBobina = parseFloat(formData.get(`metrosBobina_${bobinaIndex}`)) || 0;
+        const entregaVacia = formData.get(`entregaVacia_${bobinaIndex}`) === 'on';
+        const tipoMaterial = formData.get(`tipoMaterial_${bobinaIndex}`);
+        
+        if (!metrosBobina || !tipoMaterial) {
+            mostrarToast(`Complete todos los campos requeridos de la bobina ${bobinaIndex}`, 'error');
+            return;
+        }
+        
+        const bobinaData = {
+            metrosBobina,
+            entregaVacia,
+            tipoMaterial,
+            numeroMatriculaCable: formData.get(`numeroMatriculaCable_${bobinaIndex}`) || '',
+            metrosCableBobina: parseFloat(formData.get(`metrosCable_${bobinaIndex}`)) || 0,
+            numeroMatriculaVacia: formData.get(`numeroMatriculaVacia_${bobinaIndex}`) || '',
+            descripcionOtroMaterial: formData.get(`descripcionOtroMaterial_${bobinaIndex}`) || ''
+        };
+        
+        // Validar campos específicos según el tipo
+        if (tipoMaterial === 'bobina_con_cable' && (!bobinaData.numeroMatriculaCable || !bobinaData.metrosCableBobina)) {
+            mostrarToast(`Complete los campos de cable para la bobina ${bobinaIndex}`, 'error');
+            return;
+        }
+        
+        if (tipoMaterial === 'bobina_vacia' && !bobinaData.numeroMatriculaVacia) {
+            mostrarToast(`Complete el número de matrícula para la bobina ${bobinaIndex}`, 'error');
+            return;
+        }
+        
+        if (tipoMaterial === 'otro' && !bobinaData.descripcionOtroMaterial) {
+            mostrarToast(`Complete la descripción del material para la bobina ${bobinaIndex}`, 'error');
+            return;
+        }
+        
+        bobinasData.push(bobinaData);
+    });
+    
+    // Crear devolución con múltiples bobinas
     const devolucion = {
         id: generarIdDevolucion(),
         idObra: formData.get('idObra'),
-        metrosBobina: parseFloat(formData.get('metrosBobina')) || 0,
-        entregaVacia: formData.get('entregaVacia') === 'on',
         fechaEntrega: formData.get('fecha'),
         tipoInstalacion: formData.get('tipoInstalacion'),
-        tipoMaterial: formData.get('tipoMaterial'),
-        numeroMatriculaCable: formData.get('numeroMatriculaCable') || '',
-        metrosCableBobina: parseFloat(formData.get('metrosCableBobina')) || 0,
-        numeroMatriculaVacia: formData.get('numeroMatriculaVacia') || '',
-        descripcionOtroMaterial: formData.get('descripcionOtroMaterial') || '',
+        bobinas: bobinasData,
         observaciones: formData.get('observaciones') || '',
         fechaCreacion: new Date().toISOString()
     };
@@ -585,49 +793,72 @@ function mostrarDevoluciones() {
 function crearTarjetaDevolucion(devolucion) {
     const fechaFormateada = new Date(devolucion.fechaEntrega).toLocaleDateString('es-ES');
     
-    let tipoMaterialText = '';
-    let detallesMaterial = '';
-    
-    switch(devolucion.tipoMaterial) {
-        case 'bobina_con_cable':
-            tipoMaterialText = 'Bobina con Cable';
-            detallesMaterial = `
+    // Generar HTML para todas las bobinas
+    let bobinasHtml = '';
+    devolucion.bobinas.forEach((bobina, index) => {
+        let tipoMaterialText = '';
+        let detallesMaterial = '';
+        
+        switch(bobina.tipoMaterial) {
+            case 'bobina_con_cable':
+                tipoMaterialText = 'Bobina con Cable';
+                detallesMaterial = `
+                    <div class="info-row">
+                        <span class="info-label">Nº Matrícula:</span>
+                        <span class="info-value">${bobina.numeroMatriculaCable}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Metros de Cable:</span>
+                        <span class="info-value">${bobina.metrosCableBobina} m</span>
+                    </div>
+                `;
+                break;
+            case 'bobina_vacia':
+                tipoMaterialText = 'Bobina Vacía';
+                detallesMaterial = `
+                    <div class="info-row">
+                        <span class="info-label">Nº Matrícula:</span>
+                        <span class="info-value">${bobina.numeroMatriculaVacia}</span>
+                    </div>
+                `;
+                break;
+            case 'otro':
+                tipoMaterialText = 'Otro Material';
+                detallesMaterial = `
+                    <div class="info-row">
+                        <span class="info-label">Material:</span>
+                        <span class="info-value">${bobina.descripcionOtroMaterial}</span>
+                    </div>
+                `;
+                break;
+        }
+
+        let entregaVaciaText = bobina.entregaVacia ? 'SÍ' : 'NO';
+
+        bobinasHtml += `
+            <div class="bobina-info" style="margin-bottom: ${index < devolucion.bobinas.length - 1 ? 'var(--space-md)' : '0'}; padding-bottom: ${index < devolucion.bobinas.length - 1 ? 'var(--space-md)' : '0'}; border-bottom: ${index < devolucion.bobinas.length - 1 ? '1px solid var(--neutral-300)' : 'none'};">
+                <div style="font-weight: 600; color: var(--primary-500); margin-bottom: var(--space-sm);">Bobina ${index + 1}</div>
                 <div class="info-row">
-                    <span class="info-label">Nº Matrícula:</span>
-                    <span class="info-value">${devolucion.numeroMatriculaCable}</span>
+                    <span class="info-label">Metros Bobina:</span>
+                    <span class="info-value">${bobina.metrosBobina} m</span>
                 </div>
                 <div class="info-row">
-                    <span class="info-label">Metros de Cable:</span>
-                    <span class="info-value">${devolucion.metrosCableBobina} m</span>
+                    <span class="info-label">Entrega Vacía:</span>
+                    <span class="info-value">${entregaVaciaText}</span>
                 </div>
-            `;
-            break;
-        case 'bobina_vacia':
-            tipoMaterialText = 'Bobina Vacía';
-            detallesMaterial = `
-                <div class="info-row">
-                    <span class="info-label">Nº Matrícula:</span>
-                    <span class="info-value">${devolucion.numeroMatriculaVacia}</span>
-                </div>
-            `;
-            break;
-        case 'otro':
-            tipoMaterialText = 'Otro Material';
-            detallesMaterial = `
                 <div class="info-row">
                     <span class="info-label">Material:</span>
-                    <span class="info-value">${devolucion.descripcionOtroMaterial}</span>
+                    <span class="info-value">${tipoMaterialText}</span>
                 </div>
-            `;
-            break;
-    }
-
-    let entregaVaciaText = devolucion.entregaVacia ? 'SÍ' : 'NO';
+                ${detallesMaterial}
+            </div>
+        `;
+    });
 
     let observacionesHtml = '';
     if (devolucion.observaciones) {
         observacionesHtml = `
-            <div class="observaciones">
+            <div class="observaciones" style="margin-top: var(--space-md); padding-top: var(--space-md); border-top: 1px solid var(--neutral-300);">
                 <strong>Observaciones:</strong> ${devolucion.observaciones}
             </div>
         `;
@@ -645,14 +876,6 @@ function crearTarjetaDevolucion(devolucion) {
                     <span class="info-value">${devolucion.idObra}</span>
                 </div>
                 <div class="info-row">
-                    <span class="info-label">Metros Bobina:</span>
-                    <span class="info-value">${devolucion.metrosBobina} m</span>
-                </div>
-                <div class="info-row">
-                    <span class="info-label">Entrega Vacía:</span>
-                    <span class="info-value">${entregaVaciaText}</span>
-                </div>
-                <div class="info-row">
                     <span class="info-label">Fecha Entrega:</span>
                     <span class="info-value">${fechaFormateada}</span>
                 </div>
@@ -661,10 +884,10 @@ function crearTarjetaDevolucion(devolucion) {
                     <span class="info-value">${devolucion.tipoInstalacion}</span>
                 </div>
                 <div class="info-row">
-                    <span class="info-label">Material:</span>
-                    <span class="info-value">${tipoMaterialText}</span>
+                    <span class="info-label">Total Bobinas:</span>
+                    <span class="info-value">${devolucion.bobinas.length}</span>
                 </div>
-                ${detallesMaterial}
+                ${bobinasHtml}
                 ${observacionesHtml}
             </div>
             <div class="albaran-actions">
@@ -680,16 +903,15 @@ function abrirModalNuevaDevolucion() {
     document.getElementById('modalNuevaDevolucion').classList.add('active');
     document.getElementById('idObraDevolucion').focus();
     establecerFechaActual();
+    inicializarBobinas(); // Inicializar con una bobina por defecto
 }
 
 function cerrarModalDevolucion() {
     document.getElementById('modalNuevaDevolucion').classList.remove('active');
     document.getElementById('formNuevaDevolucion').reset();
     
-    // Ocultar todos los campos condicionales
-    document.getElementById('camposBobinaCable').style.display = 'none';
-    document.getElementById('camposBobinaVacia').style.display = 'none';
-    document.getElementById('camposOtroMaterial').style.display = 'none';
+    // Limpiar contenedor de bobinas
+    document.getElementById('bobinasContainer').innerHTML = '';
 }
 
 function toggleCamposMaterial() {
@@ -1103,13 +1325,34 @@ function generarReporteDevoluciones() {
     yPos += 15;
     
     const totalDevoluciones = devoluciones.length;
-    const bobinasConCable = devoluciones.filter(d => d.tipoMaterial === 'bobina_con_cable').length;
-    const bobinasVacias = devoluciones.filter(d => d.tipoMaterial === 'bobina_vacia').length;
-    const otrosMateriales = devoluciones.filter(d => d.tipoMaterial === 'otro').length;
-    const entregasVacias = devoluciones.filter(d => d.entregaVacia).length;
+    let totalBobinas = 0;
+    let bobinasConCable = 0;
+    let bobinasVacias = 0;
+    let otrosMateriales = 0;
+    let entregasVacias = 0;
+    
+    devoluciones.forEach(devolucion => {
+        totalBobinas += devolucion.bobinas.length;
+        devolucion.bobinas.forEach(bobina => {
+            switch(bobina.tipoMaterial) {
+                case 'bobina_con_cable':
+                    bobinasConCable++;
+                    break;
+                case 'bobina_vacia':
+                    bobinasVacias++;
+                    break;
+                case 'otro':
+                    otrosMateriales++;
+                    break;
+            }
+            if (bobina.entregaVacia) entregasVacias++;
+        });
+    });
     
     doc.setFontSize(12);
     doc.text(`Total de Devoluciones: ${totalDevoluciones}`, 25, yPos);
+    yPos += 8;
+    doc.text(`Total de Bobinas: ${totalBobinas}`, 25, yPos);
     yPos += 8;
     doc.text(`Bobinas con Cable: ${bobinasConCable}`, 25, yPos);
     yPos += 8;
@@ -1135,44 +1378,49 @@ function generarReporteDevoluciones() {
         
         doc.text('ID', 22, yPos - 2);
         doc.text('ID Obra', 45, yPos - 2);
-        doc.text('Material', 80, yPos - 2);
-        doc.text('Metros', 130, yPos - 2);
-        doc.text('Fecha', 155, yPos - 2);
-        doc.text('Vacía', 180, yPos - 2);
+        doc.text('Bobina', 85, yPos - 2);
+        doc.text('Material', 120, yPos - 2);
+        doc.text('Metros', 160, yPos - 2);
+        doc.text('Vacía', 185, yPos - 2);
         
         yPos += 12;
         
         // Datos
         doc.setTextColor(0, 0, 0);
         devoluciones.forEach((devolucion, index) => {
-            if (yPos > 250) {
-                doc.addPage();
-                yPos = 30;
-            }
-            
-            // Alternar colores de fondo
-            if (index % 2 === 0) {
-                doc.setFillColor(245, 241, 230);
-                doc.rect(20, yPos - 8, 170, 8, 'F');
-            }
-            
             const fecha = new Date(devolucion.fechaEntrega).toLocaleDateString('es-ES');
-            const tipoMaterial = devolucion.tipoMaterial === 'bobina_con_cable' ? 'C/B cable' : 
-                               devolucion.tipoMaterial === 'bobina_vacia' ? 'Bobina vacía' : 'Otro';
-            const entregaVacia = devolucion.entregaVacia ? 'SÍ' : 'NO';
-            
-            // Ajustar texto
             const obraText = devolucion.idObra.length > 12 ? devolucion.idObra.substring(0, 12) + '...' : devolucion.idObra;
-            const materialText = tipoMaterial.length > 18 ? tipoMaterial.substring(0, 18) + '...' : tipoMaterial;
             
-            doc.text(devolucion.id, 22, yPos - 2);
-            doc.text(obraText, 45, yPos - 2);
-            doc.text(materialText, 80, yPos - 2);
-            doc.text(`${devolucion.metrosBobina}m`, 130, yPos - 2);
-            doc.text(fecha, 155, yPos - 2);
-            doc.text(entregaVacia, 180, yPos - 2);
+            devolucion.bobinas.forEach((bobina, bobinaIndex) => {
+                if (yPos > 250) {
+                    doc.addPage();
+                    yPos = 30;
+                }
+                
+                // Alternar colores de fondo
+                if ((index + bobinaIndex) % 2 === 0) {
+                    doc.setFillColor(245, 241, 230);
+                    doc.rect(20, yPos - 8, 170, 8, 'F');
+                }
+                
+                const tipoMaterial = bobina.tipoMaterial === 'bobina_con_cable' ? 'C/B cable' : 
+                                   bobina.tipoMaterial === 'bobina_vacia' ? 'Bobina vacía' : 'Otro';
+                const entregaVacia = bobina.entregaVacia ? 'SÍ' : 'NO';
+                
+                // Ajustar texto
+                const materialText = tipoMaterial.length > 15 ? tipoMaterial.substring(0, 15) + '...' : tipoMaterial;
+                
+                doc.text(devolucion.id, 22, yPos - 2);
+                doc.text(obraText, 45, yPos - 2);
+                doc.text(`${bobinaIndex + 1}`, 85, yPos - 2);
+                doc.text(materialText, 120, yPos - 2);
+                doc.text(`${bobina.metrosBobina}m`, 160, yPos - 2);
+                doc.text(entregaVacia, 185, yPos - 2);
+                
+                yPos += 8;
+            });
             
-            yPos += 8;
+            yPos += 8; // Espacio entre devoluciones
         });
     }
     
