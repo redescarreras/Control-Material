@@ -47,6 +47,15 @@
                 </div>
             </div>
             <div class="header-actions">
+                <button id="btnBuscar" class="btn btn-info" onclick="abrirBuscador()">
+                    🔍 Buscar
+                </button>
+                <button id="btnExportar" class="btn btn-secondary" onclick="exportarDatosSimple()">
+                    📤 Exportar
+                </button>
+                <button id="btnImportar" class="btn btn-warning" onclick="abrirImportar()">
+                    📥 Importar
+                </button>
                 <button id="btnNuevoAlbaran" class="btn btn-primary">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <line x1="12" y1="5" x2="12" y2="19"></line>
@@ -674,6 +683,57 @@
                     <button type="submit" class="btn btn-primary">Registrar Devolución</button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <!-- Modal para Buscador -->
+    <div id="modalBuscador" class="modal">
+        <div class="modal-content modal-large">
+            <div class="modal-header">
+                <h2>🔍 Buscar Obra</h2>
+                <button class="modal-close" onclick="cerrarModalBuscador()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="buscarObra">ID de Obra</label>
+                    <input type="text" id="buscarObra" placeholder="Ingresa el ID de obra a buscar..." oninput="buscarEnTiempoReal()">
+                </div>
+                <div id="resultados-busqueda">
+                    <div class="no-results">
+                        <p>💡 Ingresa un ID de obra para comenzar la búsqueda</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para Importar Datos -->
+    <div id="modalImportar" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>📥 Importar Datos</h2>
+                <button class="modal-close" onclick="cerrarModalImportar()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="import-info">
+                    <div class="info-box">
+                        <h3>⚠️ Importante</h3>
+                        <p>Al importar datos, <strong>se reemplazarán todos los datos actuales</strong>. Se recomienda hacer una copia de seguridad antes.</p>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="archivoImportar">Seleccionar archivo de datos (.json)</label>
+                    <input type="file" id="archivoImportar" accept=".json" onchange="procesarArchivoImportar()">
+                    <small class="form-help">El archivo debe contener los datos exportados de esta aplicación</small>
+                </div>
+                <div id="preview-import" class="import-preview" style="display: none;">
+                    <!-- Preview de datos se mostrará aquí -->
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="cerrarModalImportar()">Cancelar</button>
+                    <button type="button" class="btn btn-warning" id="btnConfirmarImportar" onclick="confirmarImportar()" disabled>Importar Datos</button>
+                </div>
+            </div>
         </div>
     </div>
 

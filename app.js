@@ -7,6 +7,8 @@ let devoluciones = [];
 
 // ===== INICIALIZACIÓN =====
 document.addEventListener('DOMContentLoaded', function() {
+    console.log('🚀 Iniciando aplicación...');
+    
     // Cargar todos los datos primero
     cargarAlbaranes();
     cargarMateriales();
@@ -15,6 +17,8 @@ document.addEventListener('DOMContentLoaded', function() {
     // Configurar event listeners
     configurarEventListeners();
     establecerFechaActual();
+    
+
     
     // Mostrar datos y actualizar contadores con un pequeño delay para asegurar que todo esté cargado
     mostrarAlbaranes();
@@ -164,6 +168,8 @@ function configurarEventListeners() {
                 cerrarModalEntradaCable();
                 cerrarModalEntradaSubconducto();
                 cerrarModalDevolucion();
+                cerrarModalBuscador();
+                cerrarModalImportar();
             }
         });
     });
@@ -178,8 +184,11 @@ function configurarEventListeners() {
             cerrarModalEntradaCable();
             cerrarModalEntradaSubconducto();
             cerrarModalDevolucion();
+            cerrarModalBuscador();
+            cerrarModalImportar();
         }
     });
+
 }
 
 // ===== NAVEGACIÓN POR PESTAÑAS =====
@@ -1746,4 +1755,510 @@ function actualizarStockDisplay(tipo) {
     document.getElementById(`${prefijo}-recibido`).textContent = stock.recibido.toFixed(1);
     document.getElementById(`${prefijo}-instalado`).textContent = stock.instalado.toFixed(1);
     document.getElementById(`${prefijo}-disponible`).textContent = stock.disponible.toFixed(1);
+}
+
+// ===== FUNCIONES SIMPLES PARA NUEVOS BOTONES =====
+// ===== EXPORTAR DATOS =====
+function exportarDatos() {
+    console.log('📤 Ejecutando exportarDatos()');
+    try {
+        console.log('📊 Datos a exportar:', {
+            albaranes: albaranes.length,
+            cables: cables.length,
+            subconductos: subconductos.length,
+            devoluciones: devoluciones.length
+        });
+        
+        const datosCompletos = {
+            timestamp: new Date().toISOString(),
+            version: '1.0',
+            albaranes: albaranes,
+            cables: cables,
+            subconductos: subconductos,
+            devoluciones: devoluciones,
+            metadata: {
+                totalAlbaranes: albaranes.length,
+                totalCables: cables.length,
+                totalSubconductos: subconductos.length,
+                totalDevoluciones: devoluciones.length
+            }
+        };
+        
+        const datosJson = JSON.stringify(datosCompletos, null, 2);
+        const fecha = new Date().toISOString().split('T')[0];
+        const nombreArchivo = `backup_materiales_${fecha}.json`;
+        
+        console.log('📁 Creando archivo:', nombreArchivo);
+        
+        // Crear y descargar archivo
+        const blob = new Blob([datosJson], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = nombreArchivo;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+        
+        console.log('✅ Archivo descargado correctamente');
+        mostrarToast(`✅ Datos exportados correctamente: ${nombreArchivo}`, 'success');
+    } catch (error) {
+        console.error('❌ Error al exportar datos:', error);
+        mostrarToast('❌ Error al exportar datos', 'error');
+    }
+}
+
+// ===== IMPORTAR DATOS =====
+function abrirModalImportar() {
+    console.log('📥 Ejecutando abrirModalImportar()');
+    const modal = document.getElementById('modalImportar');
+    if (modal) {
+        modal.classList.add('active');
+        console.log('✅ Modal importar abierto');
+        const archivoInput = document.getElementById('archivoImportar');
+        const preview = document.getElementById('preview-import');
+        const btnConfirmar = document.getElementById('btnConfirmarImportar');
+        
+        if (archivoInput) archivoInput.value = '';
+        if (preview) preview.style.display = 'none';
+        if (btnConfirmar) btnConfirmar.disabled = true;
+    } else {
+        console.error('❌ No se encontró el modal de importar');
+    }
+}
+
+function cerrarModalImportar() {
+    document.getElementById('modalImportar').classList.remove('active');
+    document.getElementById('archivoImportar').value = '';
+    document.getElementById('preview-import').style.display = 'none';
+    document.getElementById('btnConfirmarImportar').disabled = true;
+}
+
+function procesarArchivoImportar() {
+    const archivo = document.getElementById('archivoImportar').files[0];
+    const preview = document.getElementById('preview-import');
+    const btnConfirmar = document.getElementById('btnConfirmarImportar');
+    
+    if (!archivo) {
+        preview.style.display = 'none';
+        btnConfirmar.disabled = true;
+        return;
+    }
+    
+    if (!archivo.name.endsWith('.json')) {
+        mostrarToast('❌ Solo se permiten archivos JSON', 'error');
+        document.getElementById('archivoImportar').value = '';
+        return;
+    }
+    
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        try {
+            const datos = JSON.parse(e.target.result);
+            
+            // Validar estructura de datos
+            if (!datos.albaranes || !datos.cables || !datos.subconductos || !datos.devoluciones) {
+                throw new Error('Estructura de datos inválida');
+            }
+            
+            // Mostrar preview
+            mostrarPreviewImport(datos);
+            btnConfirmar.disabled = false;
+            
+        } catch (error) {
+            console.error('Error al procesar archivo:', error);
+            mostrarToast('❌ Error al leer el archivo: formato inválido', 'error');
+            document.getElementById('archivoImportar').value = '';
+            preview.style.display = 'none';
+            btnConfirmar.disabled = true;
+        }
+    };
+    
+    reader.readAsText(archivo);
+}
+
+function mostrarPreviewImport(datos) {
+    const preview = document.getElementById('preview-import');
+    
+    const stats = {
+        albaranes: datos.albaranes.length,
+        cables: datos.cables.length,
+        subconductos: datos.subconductos.length,
+        devoluciones: datos.devoluciones.length
+    };
+    
+    preview.innerHTML = `
+        <h4>📊 Preview de Datos</h4>
+        <p><strong>Archivo:</strong> ${datos.timestamp ? new Date(datos.timestamp).toLocaleDateString() : 'Fecha no disponible'}</p>
+        <div class="import-stats">
+            <div class="import-stat">
+                <div class="stat-number">${stats.albaranes}</div>
+                <div class="stat-label">Albaranes</div>
+            </div>
+            <div class="import-stat">
+                <div class="stat-number">${stats.cables}</div>
+                <div class="stat-label">Cables</div>
+            </div>
+            <div class="import-stat">
+                <div class="stat-number">${stats.subconductos}</div>
+                <div class="stat-label">Subconductos</div>
+            </div>
+            <div class="import-stat">
+                <div class="stat-number">${stats.devoluciones}</div>
+                <div class="stat-label">Devoluciones</div>
+            </div>
+        </div>
+    `;
+    
+    preview.style.display = 'block';
+}
+
+function confirmarImportar() {
+    const archivo = document.getElementById('archivoImportar').files[0];
+    
+    if (!archivo) {
+        mostrarToast('❌ No hay archivo seleccionado', 'error');
+        return;
+    }
+    
+    if (confirm('⚠️ ¿Estás seguro de que quieres importar estos datos?\n\nEsto reemplazará TODOS los datos actuales y no se puede deshacer.')) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                const datos = JSON.parse(e.target.result);
+                
+                // Validar y cargar datos
+                albaranes = datos.albaranes || [];
+                cables = datos.cables || [];
+                subconductos = datos.subconductos || [];
+                devoluciones = datos.devoluciones || [];
+                
+                // Guardar en localStorage
+                guardarAlbaranes();
+                guardarMateriales();
+                guardarDevoluciones();
+                
+                // Actualizar interfaz
+                actualizarContadores();
+                mostrarAlbaranes();
+                actualizarStockDisplay('cable');
+                actualizarStockDisplay('subconducto');
+                mostrarDevoluciones();
+                
+                cerrarModalImportar();
+                mostrarToast(`✅ Datos importados correctamente`, 'success');
+                
+            } catch (error) {
+                console.error('Error al importar datos:', error);
+                mostrarToast('❌ Error al importar los datos', 'error');
+            }
+        };
+        
+        reader.readAsText(archivo);
+    }
+}
+
+// ===== FUNCIONES SIMPLES PARA NUEVOS BOTONES =====
+function abrirBuscador() {
+    // Abrir modal del buscador
+    document.getElementById('modalBuscador').classList.add('active');
+    document.getElementById('buscarObra').value = '';
+    document.getElementById('buscarObra').focus();
+    mostrarResultadosIniciales();
+}
+
+function cerrarModalBuscador() {
+    document.getElementById('modalBuscador').classList.remove('active');
+}
+
+function mostrarResultadosIniciales() {
+    document.getElementById('resultados-busqueda').innerHTML = '<div class="no-results"><p>💡 Ingresa un ID de obra para comenzar la búsqueda</p></div>';
+}
+
+function buscarEnTiempoReal() {
+    const termino = document.getElementById('buscarObra').value.trim();
+    const resultadosContainer = document.getElementById('resultados-busqueda');
+    
+    if (termino.length < 2) {
+        mostrarResultadosIniciales();
+        return;
+    }
+    
+    // Buscar en todos los datos
+    const resultados = {
+        albaranes: buscarAlbaranes(termino),
+        cables: buscarCables(termino),
+        subconductos: buscarSubconductos(termino),
+        devoluciones: buscarDevoluciones(termino)
+    };
+    
+    // Mostrar resultados
+    mostrarResultadosBusqueda(resultados);
+}
+
+function buscarAlbaranes(termino) {
+    return albaranes.filter(albaran => 
+        albaran.idObra.toLowerCase().includes(termino.toLowerCase()) ||
+        albaran.id.toLowerCase().includes(termino.toLowerCase()) ||
+        albaran.cuentaCargo.toLowerCase().includes(termino.toLowerCase())
+    );
+}
+
+function buscarCables(termino) {
+    return cables.filter(cable => 
+        cable.idObra.toLowerCase().includes(termino.toLowerCase()) ||
+        cable.id.toLowerCase().includes(termino.toLowerCase()) ||
+        cable.tipoCable.toLowerCase().includes(termino.toLowerCase())
+    );
+}
+
+function buscarSubconductos(termino) {
+    return subconductos.filter(subconducto => 
+        subconducto.idObra.toLowerCase().includes(termino.toLowerCase()) ||
+        subconducto.id.toLowerCase().includes(termino.toLowerCase()) ||
+        subconducto.tipoSubconducto.toLowerCase().includes(termino.toLowerCase())
+    );
+}
+
+function buscarDevoluciones(termino) {
+    return devoluciones.filter(devolucion => 
+        devolucion.idObra.toLowerCase().includes(termino.toLowerCase()) ||
+        devolucion.id.toLowerCase().includes(termino.toLowerCase())
+    );
+}
+
+function mostrarResultadosBusqueda(resultados) {
+    const container = document.getElementById('resultados-busqueda');
+    const totalResultados = Object.values(resultados).reduce((sum, arr) => sum + arr.length, 0);
+    
+    if (totalResultados === 0) {
+        container.innerHTML = '<div class="resultado-vacio">🔍 No se encontraron resultados para la búsqueda</div>';
+        return;
+    }
+    
+    let html = '';
+    
+    // Albaranes
+    if (resultados.albaranes.length > 0) {
+        html += '<div class="resultado-seccion">';
+        html += '<h3>📋 Albaranes</h3>';
+        resultados.albaranes.forEach(albaran => {
+            const estadoIcon = albaran.estado === 'pendiente' ? '📋' : 
+                              albaran.estado === 'recibido' ? '✅' : '⚠️';
+            html += `
+                <div class="resultado-item">
+                    <div class="item-header">
+                        <span class="item-id">${estadoIcon} ${albaran.id}</span>
+                        <span class="item-fecha">${formatDate(albaran.fecha)}</span>
+                    </div>
+                    <div class="item-details">
+                        <div class="detail-item">
+                            <span class="detail-label">ID Obra:</span>
+                            <span class="detail-value">${albaran.idObra}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Estado:</span>
+                            <span class="detail-value">${albaran.estado.toUpperCase()}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Instalación:</span>
+                            <span class="detail-value">${albaran.tipoInstalacion}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Cuenta:</span>
+                            <span class="detail-value">${albaran.cuentaCargo}</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+        html += '</div>';
+    }
+    
+    // Cables
+    if (resultados.cables.length > 0) {
+        html += '<div class="resultado-seccion">';
+        html += '<h3>🔌 Cables</h3>';
+        resultados.cables.forEach(cable => {
+            html += `
+                <div class="resultado-item">
+                    <div class="item-header">
+                        <span class="item-id">🔌 ${cable.id}</span>
+                        <span class="item-fecha">${formatDate(cable.fecha)}</span>
+                    </div>
+                    <div class="item-details">
+                        <div class="detail-item">
+                            <span class="detail-label">ID Obra:</span>
+                            <span class="detail-value">${cable.idObra}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Tipo:</span>
+                            <span class="detail-value">${cable.tipoCable}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Metros:</span>
+                            <span class="detail-value">${cable.metros} m</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Categoría:</span>
+                            <span class="detail-value">${cable.categoria || 'Instalación'}</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+        html += '</div>';
+    }
+    
+    // Subconductos
+    if (resultados.subconductos.length > 0) {
+        html += '<div class="resultado-seccion">';
+        html += '<h3>🛡️ Subconductos</h3>';
+        resultados.subconductos.forEach(subconducto => {
+            html += `
+                <div class="resultado-item">
+                    <div class="item-header">
+                        <span class="item-id">🛡️ ${subconducto.id}</span>
+                        <span class="item-fecha">${formatDate(subconducto.fecha)}</span>
+                    </div>
+                    <div class="item-details">
+                        <div class="detail-item">
+                            <span class="detail-label">ID Obra:</span>
+                            <span class="detail-value">${subconducto.idObra}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Tipo:</span>
+                            <span class="detail-value">${subconducto.tipoSubconducto}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Metros:</span>
+                            <span class="detail-value">${subconducto.metros} m</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Categoría:</span>
+                            <span class="detail-value">${subconducto.categoria || 'Instalación'}</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+        html += '</div>';
+    }
+    
+    // Devoluciones
+    if (resultados.devoluciones.length > 0) {
+        html += '<div class="resultado-seccion">';
+        html += '<h3>↩️ Devoluciones</h3>';
+        resultados.devoluciones.forEach(devolucion => {
+            const totalBobinas = devolucion.bobinas ? devolucion.bobinas.length : 0;
+            html += `
+                <div class="resultado-item">
+                    <div class="item-header">
+                        <span class="item-id">↩️ ${devolucion.id}</span>
+                        <span class="item-fecha">${formatDate(devolucion.fecha)}</span>
+                    </div>
+                    <div class="item-details">
+                        <div class="detail-item">
+                            <span class="detail-label">ID Obra:</span>
+                            <span class="detail-value">${devolucion.idObra}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Bobinas:</span>
+                            <span class="detail-value">${totalBobinas}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Instalación:</span>
+                            <span class="detail-value">${devolucion.tipoInstalacion}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Total Metros:</span>
+                            <span class="detail-value">${calcularTotalMetrosDevolucion(devolucion)} m</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+        html += '</div>';
+    }
+    
+    container.innerHTML = html;
+}
+
+function calcularTotalMetrosDevolucion(devolucion) {
+    if (!devolucion.bobinas) return 0;
+    return devolucion.bobinas.reduce((total, bobina) => total + (parseFloat(bobina.metros) || 0), 0);
+}
+
+function exportarDatosSimple() {
+    try {
+        // Crear datos de backup
+        const datos = {
+            timestamp: new Date().toISOString(),
+            albaranes: albaranes,
+            cables: cables,
+            subconductos: subconductos,
+            devoluciones: devoluciones
+        };
+        
+        // Descargar archivo
+        const blob = new Blob([JSON.stringify(datos, null, 2)], {type: 'application/json'});
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `backup_${new Date().toISOString().split('T')[0]}.json`;
+        link.click();
+        URL.revokeObjectURL(url);
+        
+        alert('✅ Datos exportados correctamente');
+    } catch (error) {
+        alert('❌ Error al exportar: ' + error.message);
+    }
+}
+
+function abrirImportar() {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.json';
+    input.onchange = function(e) {
+        const archivo = e.target.files[0];
+        if (archivo) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const datos = JSON.parse(e.target.result);
+                    if (confirm('¿Seguro que quieres importar estos datos? Esto reemplazará todos los datos actuales.')) {
+                        albaranes = datos.albaranes || [];
+                        cables = datos.cables || [];
+                        subconductos = datos.subconductos || [];
+                        devoluciones = datos.devoluciones || [];
+                        
+                        // Guardar datos
+                        guardarAlbaranes();
+                        guardarMateriales();
+                        guardarDevoluciones();
+                        
+                        // Actualizar interfaz
+                        actualizarContadores();
+                        mostrarAlbaranes();
+                        actualizarStockDisplay('cable');
+                        actualizarStockDisplay('subconducto');
+                        mostrarDevoluciones();
+                        
+                        alert('✅ Datos importados correctamente');
+                    }
+                } catch (error) {
+                    alert('❌ Error al leer el archivo: ' + error.message);
+                }
+            };
+            reader.readAsText(archivo);
+        }
+    };
+    input.click();
+}
+
+// ===== FORMATO DE FECHA =====
+function formatDate(fecha) {
+    if (!fecha) return 'N/A';
+    return new Date(fecha).toLocaleDateString('es-ES');
 }

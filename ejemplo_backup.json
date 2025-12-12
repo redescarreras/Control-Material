@@ -1,0 +1,63 @@
+{
+  "timestamp": "2025-12-12T19:21:32.000Z",
+  "version": "1.0",
+  "albaranes": [
+    {
+      "id": "ALB-20241212-001",
+      "idObra": "OBR-2024-001",
+      "fecha": "2024-12-12",
+      "cuentaCargo": "CC-001-2024",
+      "tipoInstalacion": "FTTH",
+      "jefeObra": "Juan Pérez",
+      "observaciones": "Instalación de fibra óptica",
+      "estado": "pendiente",
+      "fechaCreacion": "2024-12-12T10:00:00.000Z",
+      "fechaRecepcion": null,
+      "materialFaltante": null
+    }
+  ],
+  "cables": [
+    {
+      "id": "CAB-20241212-001",
+      "idObra": "OBR-2024-001",
+      "tipoCable": "Cable de f.o. de exterior PKP holgado de 16 fo.",
+      "metros": 150.5,
+      "fecha": "2024-12-12",
+      "observaciones": "Cable para instalación principal",
+      "categoria": "Instalación"
+    }
+  ],
+  "subconductos": [
+    {
+      "id": "SUB-20241212-001",
+      "idObra": "OBR-2024-001",
+      "tipoSubconducto": "Subconducto 40mm",
+      "metros": 200.0,
+      "fecha": "2024-12-12",
+      "observaciones": "Protección para cables",
+      "categoria": "Instalación"
+    }
+  ],
+  "devoluciones": [
+    {
+      "id": "DEV-20241212-001",
+      "idObra": "OBR-2024-001",
+      "fecha": "2024-12-12",
+      "tipoInstalacion": "FTTH",
+      "bobinas": [
+        {
+          "metros": 50.0,
+          "materialFaltante": false,
+          "materialType": "bobina con cable"
+        }
+      ],
+      "observaciones": "Devolución de material sobrante"
+    }
+  ],
+  "metadata": {
+    "totalAlbaranes": 1,
+    "totalCables": 1,
+    "totalSubconductos": 1,
+    "totalDevoluciones": 1
+  }
+}
