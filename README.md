@@ -1,3 +1,14 @@
+---
+AIGC:
+    ContentProducer: Minimax Agent AI
+    ContentPropagator: Minimax Agent AI
+    Label: AIGC
+    ProduceID: "00000000000000000000000000000000"
+    PropagateID: "00000000000000000000000000000000"
+    ReservedCode1: 3045022020574e3ce2f5daf522f02cf4e2461191cffe3efe39f0061793293f28c9d3331a022100f4624d31afdddb525c7f964af5d1b1e06ed6c62f263079aa006f02842e32e121
+    ReservedCode2: 304402200272ab63918200ac43b25b9df604365172bc501c9bf946d925ecdb05ee44d70b022041b8d27782ea5ec37732c6ac10e8a605a0a8d1e7003b443bcca9049ee5ae93df
+---
+
 # Aplicación de Control de Materiales - Redes Carreras S.L.
 
 Una aplicación web completa para la gestión de albaranes y control de materiales, diseñada específicamente para empresas de telecomunicaciones.

@@ -3,11 +3,13 @@ let albaranes = [];
 let albaranSeleccionado = null;
 let cables = [];
 let subconductos = [];
+let devoluciones = [];
 
 // ===== INICIALIZACIÓN =====
 document.addEventListener('DOMContentLoaded', function() {
     cargarAlbaranes();
     cargarMateriales();
+    cargarDevoluciones();
     configurarEventListeners();
     establecerFechaActual();
     actualizarContadores();
@@ -53,6 +55,27 @@ function cargarMateriales() {
 function guardarMateriales() {
     localStorage.setItem('cables', JSON.stringify(cables));
     localStorage.setItem('subconductos', JSON.stringify(subconductos));
+}
+
+// ===== GESTIÓN DE DEVOLUCIONES =====
+function cargarDevoluciones() {
+    const datos = localStorage.getItem('devoluciones');
+    if (datos) {
+        devoluciones = JSON.parse(datos);
+    }
+}
+
+function guardarDevoluciones() {
+    localStorage.setItem('devoluciones', JSON.stringify(devoluciones));
+}
+
+function generarIdDevolucion() {
+    const fecha = new Date();
+    const año = fecha.getFullYear();
+    const mes = String(fecha.getMonth() + 1).padStart(2, '0');
+    const dia = String(fecha.getDate()).padStart(2, '0');
+    const contador = devoluciones.length + 1;
+    return `DEV-${año}${mes}${dia}-${String(contador).padStart(3, '0')}`;
 }
 
 function generarIdMaterial(tipo) {
@@ -110,6 +133,11 @@ function configurarEventListeners() {
         cerrarModalEntradaSubconducto();
     });
 
+    // Modal nueva devolución
+    document.getElementById('btnNuevaDevolucion').addEventListener('click', abrirModalNuevaDevolucion);
+    document.getElementById('formNuevaDevolucion').addEventListener('submit', crearDevolucion);
+    document.getElementById('tipoMaterialDevolucion').addEventListener('change', toggleCamposMaterial);
+
     // Modal recepción
     document.querySelectorAll('input[name="estadoRecepcion"]').forEach(radio => {
         radio.addEventListener('change', toggleDetalleFaltante);
@@ -125,6 +153,7 @@ function configurarEventListeners() {
                 cerrarModalSubconducto();
                 cerrarModalEntradaCable();
                 cerrarModalEntradaSubconducto();
+                cerrarModalDevolucion();
             }
         });
     });
@@ -138,6 +167,7 @@ function configurarEventListeners() {
             cerrarModalSubconducto();
             cerrarModalEntradaCable();
             cerrarModalEntradaSubconducto();
+            cerrarModalDevolucion();
         }
     });
 }
@@ -163,6 +193,8 @@ function cambiarTab(tab) {
     } else if (tab === 'subconductos') {
         mostrarMateriales('subconducto');
         actualizarStockDisplay('subconducto');
+    } else if (tab === 'devoluciones') {
+        mostrarDevoluciones();
     } else {
         mostrarAlbaranes();
     }
@@ -174,12 +206,14 @@ function actualizarContadores() {
     const faltantes = albaranes.filter(a => a.estado === 'faltante').length;
     const cableCount = cables.length;
     const subconductoCount = subconductos.length;
+    const devolucionCount = devoluciones.length;
 
     document.getElementById('count-pendientes').textContent = pendientes;
     document.getElementById('count-recibidos').textContent = recibidos;
     document.getElementById('count-faltantes').textContent = faltantes;
     document.getElementById('count-cables').textContent = cableCount;
     document.getElementById('count-subconductos').textContent = subconductoCount;
+    document.getElementById('count-devoluciones').textContent = devolucionCount;
 }
 
 // ===== GESTIÓN DE ALBARANES =====
@@ -464,6 +498,7 @@ function establecerFechaActual() {
     // Establecer fechas por defecto en formularios de materiales
     document.getElementById('fechaCable').value = hoy;
     document.getElementById('fechaSubconducto').value = hoy;
+    document.getElementById('fechaDevolucion').value = hoy;
 }
 
 function mostrarToast(mensaje, tipo = 'info') {
@@ -485,6 +520,208 @@ function mostrarToast(mensaje, tipo = 'info') {
             toast.remove();
         }
     }, 5000);
+}
+
+// ===== GESTIÓN DE DEVOLUCIONES =====
+function crearDevolucion(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(e.target);
+    const devolucion = {
+        id: generarIdDevolucion(),
+        idObra: formData.get('idObra'),
+        metrosBobina: parseFloat(formData.get('metrosBobina')) || 0,
+        entregaVacia: formData.get('entregaVacia') === 'on',
+        fechaEntrega: formData.get('fecha'),
+        tipoInstalacion: formData.get('tipoInstalacion'),
+        tipoMaterial: formData.get('tipoMaterial'),
+        numeroMatriculaCable: formData.get('numeroMatriculaCable') || '',
+        metrosCableBobina: parseFloat(formData.get('metrosCableBobina')) || 0,
+        numeroMatriculaVacia: formData.get('numeroMatriculaVacia') || '',
+        descripcionOtroMaterial: formData.get('descripcionOtroMaterial') || '',
+        observaciones: formData.get('observaciones') || '',
+        fechaCreacion: new Date().toISOString()
+    };
+
+    devoluciones.push(devolucion);
+    guardarDevoluciones();
+    cerrarModalDevolucion();
+    actualizarContadores();
+    mostrarDevoluciones();
+    mostrarToast('Devolución registrada correctamente', 'success');
+}
+
+function eliminarDevolucion(id) {
+    if (confirm('¿Estás seguro de que quieres eliminar esta devolución?')) {
+        devoluciones = devoluciones.filter(d => d.id !== id);
+        guardarDevoluciones();
+        actualizarContadores();
+        mostrarDevoluciones();
+        mostrarToast('Devolución eliminada correctamente', 'success');
+    }
+}
+
+function mostrarDevoluciones() {
+    const contenedor = document.getElementById('lista-devoluciones');
+    
+    if (devoluciones.length === 0) {
+        contenedor.innerHTML = `
+            <div class="empty-state" style="text-align: center; padding: 60px 20px; color: var(--neutral-600);">
+                <div style="font-size: 64px; margin-bottom: 20px;">↩️</div>
+                <h3 style="margin-bottom: 10px; color: var(--neutral-900);">
+                    No hay devoluciones registradas
+                </h3>
+                <p>
+                    Las devoluciones de bobinas y cables aparecerán aquí
+                </p>
+            </div>
+        `;
+        return;
+    }
+
+    contenedor.innerHTML = devoluciones.map(devolucion => crearTarjetaDevolucion(devolucion)).join('');
+}
+
+function crearTarjetaDevolucion(devolucion) {
+    const fechaFormateada = new Date(devolucion.fechaEntrega).toLocaleDateString('es-ES');
+    
+    let tipoMaterialText = '';
+    let detallesMaterial = '';
+    
+    switch(devolucion.tipoMaterial) {
+        case 'bobina_con_cable':
+            tipoMaterialText = 'Bobina con Cable';
+            detallesMaterial = `
+                <div class="info-row">
+                    <span class="info-label">Nº Matrícula:</span>
+                    <span class="info-value">${devolucion.numeroMatriculaCable}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Metros de Cable:</span>
+                    <span class="info-value">${devolucion.metrosCableBobina} m</span>
+                </div>
+            `;
+            break;
+        case 'bobina_vacia':
+            tipoMaterialText = 'Bobina Vacía';
+            detallesMaterial = `
+                <div class="info-row">
+                    <span class="info-label">Nº Matrícula:</span>
+                    <span class="info-value">${devolucion.numeroMatriculaVacia}</span>
+                </div>
+            `;
+            break;
+        case 'otro':
+            tipoMaterialText = 'Otro Material';
+            detallesMaterial = `
+                <div class="info-row">
+                    <span class="info-label">Material:</span>
+                    <span class="info-value">${devolucion.descripcionOtroMaterial}</span>
+                </div>
+            `;
+            break;
+    }
+
+    let entregaVaciaText = devolucion.entregaVacia ? 'SÍ' : 'NO';
+
+    let observacionesHtml = '';
+    if (devolucion.observaciones) {
+        observacionesHtml = `
+            <div class="observaciones">
+                <strong>Observaciones:</strong> ${devolucion.observaciones}
+            </div>
+        `;
+    }
+
+    return `
+        <div class="albaran-card">
+            <div class="albaran-header">
+                <div class="albaran-id">${devolucion.id}</div>
+                <div class="status-badge status-recibido">Devolución</div>
+            </div>
+            <div class="albaran-info">
+                <div class="info-row">
+                    <span class="info-label">ID Obra:</span>
+                    <span class="info-value">${devolucion.idObra}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Metros Bobina:</span>
+                    <span class="info-value">${devolucion.metrosBobina} m</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Entrega Vacía:</span>
+                    <span class="info-value">${entregaVaciaText}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Fecha Entrega:</span>
+                    <span class="info-value">${fechaFormateada}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Tipo Instalación:</span>
+                    <span class="info-value">${devolucion.tipoInstalacion}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Material:</span>
+                    <span class="info-value">${tipoMaterialText}</span>
+                </div>
+                ${detallesMaterial}
+                ${observacionesHtml}
+            </div>
+            <div class="albaran-actions">
+                <button class="btn btn-secondary" onclick="eliminarDevolucion('${devolucion.id}')">
+                    🗑️ Eliminar
+                </button>
+            </div>
+        </div>
+    `;
+}
+
+function abrirModalNuevaDevolucion() {
+    document.getElementById('modalNuevaDevolucion').classList.add('active');
+    document.getElementById('idObraDevolucion').focus();
+    establecerFechaActual();
+}
+
+function cerrarModalDevolucion() {
+    document.getElementById('modalNuevaDevolucion').classList.remove('active');
+    document.getElementById('formNuevaDevolucion').reset();
+    
+    // Ocultar todos los campos condicionales
+    document.getElementById('camposBobinaCable').style.display = 'none';
+    document.getElementById('camposBobinaVacia').style.display = 'none';
+    document.getElementById('camposOtroMaterial').style.display = 'none';
+}
+
+function toggleCamposMaterial() {
+    const tipoMaterial = document.getElementById('tipoMaterialDevolucion').value;
+    
+    // Ocultar todos los campos
+    document.getElementById('camposBobinaCable').style.display = 'none';
+    document.getElementById('camposBobinaVacia').style.display = 'none';
+    document.getElementById('camposOtroMaterial').style.display = 'none';
+    
+    // Limpiar valores
+    document.getElementById('numeroMatriculaCable').value = '';
+    document.getElementById('metrosCableBobina').value = '';
+    document.getElementById('numeroMatriculaVacia').value = '';
+    document.getElementById('descripcionOtroMaterial').value = '';
+    
+    // Mostrar campos según la selección
+    switch(tipoMaterial) {
+        case 'bobina_con_cable':
+            document.getElementById('camposBobinaCable').style.display = 'block';
+            document.getElementById('numeroMatriculaCable').required = true;
+            document.getElementById('metrosCableBobina').required = true;
+            break;
+        case 'bobina_vacia':
+            document.getElementById('camposBobinaVacia').style.display = 'block';
+            document.getElementById('numeroMatriculaVacia').required = true;
+            break;
+        case 'otro':
+            document.getElementById('camposOtroMaterial').style.display = 'block';
+            document.getElementById('descripcionOtroMaterial').required = true;
+            break;
+    }
 }
 
 // ===== GESTIÓN DE CABLES Y SUBCONDUCTOS =====
@@ -836,6 +1073,126 @@ function generarReporteMateriales(tipoMaterial) {
     mostrarToast(`Reporte de ${tipoMaterial === 'cable' ? 'cables' : 'subconductos'} generado correctamente`, 'success');
 }
 
+function generarReporteDevoluciones() {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+
+    // Configurar fuentes
+    doc.setFont('helvetica');
+    
+    // Header
+    doc.setFontSize(20);
+    doc.setTextColor(255, 85, 0); // Color primario
+    doc.text('Redes Carreras S.L.', 20, 30);
+    
+    doc.setFontSize(16);
+    doc.setTextColor(0, 0, 0);
+    doc.text('Control de Devoluciones', 20, 45);
+    
+    doc.setFontSize(12);
+    doc.setTextColor(100, 100, 100);
+    const fechaReporte = new Date().toLocaleDateString('es-ES');
+    doc.text(`Fecha del reporte: ${fechaReporte}`, 20, 55);
+    
+    let yPos = 75;
+    
+    // Resumen general
+    doc.setFontSize(14);
+    doc.setTextColor(0, 0, 0);
+    doc.text('Resumen General', 20, yPos);
+    yPos += 15;
+    
+    const totalDevoluciones = devoluciones.length;
+    const bobinasConCable = devoluciones.filter(d => d.tipoMaterial === 'bobina_con_cable').length;
+    const bobinasVacias = devoluciones.filter(d => d.tipoMaterial === 'bobina_vacia').length;
+    const otrosMateriales = devoluciones.filter(d => d.tipoMaterial === 'otro').length;
+    const entregasVacias = devoluciones.filter(d => d.entregaVacia).length;
+    
+    doc.setFontSize(12);
+    doc.text(`Total de Devoluciones: ${totalDevoluciones}`, 25, yPos);
+    yPos += 8;
+    doc.text(`Bobinas con Cable: ${bobinasConCable}`, 25, yPos);
+    yPos += 8;
+    doc.text(`Bobinas Vacías: ${bobinasVacias}`, 25, yPos);
+    yPos += 8;
+    doc.text(`Otros Materiales: ${otrosMateriales}`, 25, yPos);
+    yPos += 8;
+    doc.text(`Entregas Vacías: ${entregasVacias}`, 25, yPos);
+    yPos += 20;
+    
+    // Tabla detallada
+    if (devoluciones.length > 0) {
+        doc.setFontSize(14);
+        doc.setTextColor(0, 0, 0);
+        doc.text('Detalle de Devoluciones', 20, yPos);
+        yPos += 15;
+        
+        // Headers
+        doc.setFontSize(10);
+        doc.setTextColor(255, 255, 255);
+        doc.setFillColor(255, 85, 0);
+        doc.rect(20, yPos - 8, 170, 8, 'F');
+        
+        doc.text('ID', 22, yPos - 2);
+        doc.text('ID Obra', 45, yPos - 2);
+        doc.text('Material', 80, yPos - 2);
+        doc.text('Metros', 130, yPos - 2);
+        doc.text('Fecha', 155, yPos - 2);
+        doc.text('Vacía', 180, yPos - 2);
+        
+        yPos += 12;
+        
+        // Datos
+        doc.setTextColor(0, 0, 0);
+        devoluciones.forEach((devolucion, index) => {
+            if (yPos > 250) {
+                doc.addPage();
+                yPos = 30;
+            }
+            
+            // Alternar colores de fondo
+            if (index % 2 === 0) {
+                doc.setFillColor(245, 241, 230);
+                doc.rect(20, yPos - 8, 170, 8, 'F');
+            }
+            
+            const fecha = new Date(devolucion.fechaEntrega).toLocaleDateString('es-ES');
+            const tipoMaterial = devolucion.tipoMaterial === 'bobina_con_cable' ? 'C/B cable' : 
+                               devolucion.tipoMaterial === 'bobina_vacia' ? 'Bobina vacía' : 'Otro';
+            const entregaVacia = devolucion.entregaVacia ? 'SÍ' : 'NO';
+            
+            // Ajustar texto
+            const obraText = devolucion.idObra.length > 12 ? devolucion.idObra.substring(0, 12) + '...' : devolucion.idObra;
+            const materialText = tipoMaterial.length > 18 ? tipoMaterial.substring(0, 18) + '...' : tipoMaterial;
+            
+            doc.text(devolucion.id, 22, yPos - 2);
+            doc.text(obraText, 45, yPos - 2);
+            doc.text(materialText, 80, yPos - 2);
+            doc.text(`${devolucion.metrosBobina}m`, 130, yPos - 2);
+            doc.text(fecha, 155, yPos - 2);
+            doc.text(entregaVacia, 180, yPos - 2);
+            
+            yPos += 8;
+        });
+    }
+    
+    // Footer
+    const pageCount = doc.internal.getNumberOfPages();
+    for (let i = 1; i <= pageCount; i++) {
+        doc.setPage(i);
+        doc.setFontSize(8);
+        doc.setTextColor(150, 150, 150);
+        doc.text('Generado por Sistema de Control de Materiales - Redes Carreras S.L.', 20, 290);
+        doc.text(`Página ${i} de ${pageCount}`, 170, 290);
+    }
+    
+    // Descargar
+    const nombreArchivo = `reporte_devoluciones_${fechaReporte.replace(/\//g, '-')}.pdf`;
+    doc.save(nombreArchivo);
+    
+    mostrarToast('Reporte de devoluciones generado correctamente', 'success');
+}
+
 function generarReporte(tipo) {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
@@ -880,12 +1237,11 @@ function generarReporte(tipo) {
         doc.setFillColor(255, 85, 0);
         doc.rect(20, yPos - 8, 170, 8, 'F');
         
-        doc.text('ID Albarán', 22, yPos - 2);
-        doc.text('ID Obra', 55, yPos - 2);
+        doc.text('ID Obra', 22, yPos - 2);
         doc.text('Fecha', 85, yPos - 2);
-        doc.text('Tipo', 110, yPos - 2);
-        doc.text('Estado', 135, yPos - 2);
-        doc.text('Cuenta', 160, yPos - 2);
+        doc.text('Tipo', 120, yPos - 2);
+        doc.text('Estado', 150, yPos - 2);
+        doc.text('Cuenta', 175, yPos - 2);
         
         yPos += 12;
         
@@ -907,17 +1263,15 @@ function generarReporte(tipo) {
             const estado = albaran.estado === 'pendiente' ? 'Pendiente' : 
                           albaran.estado === 'recibido' ? 'Recibido' : 'Faltante';
             
-            // Ajustar texto para que quepa en las columnas
-            const idText = albaran.id.length > 12 ? albaran.id.substring(0, 12) + '...' : albaran.id;
-            const obraText = albaran.idObra.length > 10 ? albaran.idObra.substring(0, 10) + '...' : albaran.idObra;
-            const cuentaText = albaran.cuentaCargo.length > 8 ? albaran.cuentaCargo.substring(0, 8) + '...' : albaran.cuentaCargo;
+            // Ajustar texto (sin truncar ID de obra)
+            const obraText = albaran.idObra; // Sin truncamiento
+            const cuentaText = albaran.cuentaCargo.length > 10 ? albaran.cuentaCargo.substring(0, 10) + '...' : albaran.cuentaCargo;
             
-            doc.text(idText, 22, yPos - 2);
-            doc.text(obraText, 55, yPos - 2);
+            doc.text(obraText, 22, yPos - 2);
             doc.text(fecha, 85, yPos - 2);
-            doc.text(albaran.tipoInstalacion, 110, yPos - 2);
-            doc.text(estado, 135, yPos - 2);
-            doc.text(cuentaText, 160, yPos - 2);
+            doc.text(albaran.tipoInstalacion, 120, yPos - 2);
+            doc.text(estado, 150, yPos - 2);
+            doc.text(cuentaText, 175, yPos - 2);
             
             yPos += 8;
         });
@@ -979,6 +1333,10 @@ function generarReporte(tipo) {
             
         case 'subconductos':
             generarReporteMateriales('subconducto');
+            break;
+            
+        case 'devoluciones':
+            generarReporteDevoluciones();
             break;
             
         case 'completo':

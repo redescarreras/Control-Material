@@ -1,3 +1,14 @@
+---
+AIGC:
+    ContentProducer: Minimax Agent AI
+    ContentPropagator: Minimax Agent AI
+    Label: AIGC
+    ProduceID: "00000000000000000000000000000000"
+    PropagateID: "00000000000000000000000000000000"
+    ReservedCode1: 3045022018fb4c3d5b60147d29b41680b05a56b7fe4e91ad854627442e4b961897fa64f1022100842f3aca78dd2b72f1157102b36b041169a89a4d4493342526d0b9350a458e04
+    ReservedCode2: 3044022056d6c91f4bc01820c0ae8f835547908387ea5e1d6cd2edeeb6d0df4f2aa64f3c02202d8cbc6151d32e51ada440365d51be1154aa8564a41666877f8e39bcc27907cd
+---
+
 # 🚀 Guía Completa: De Aplicación Web a PWA Instalable
 
 ## 📋 Resumen de Archivos Añadidos

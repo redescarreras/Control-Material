@@ -1,3 +1,14 @@
+---
+AIGC:
+    ContentProducer: Minimax Agent AI
+    ContentPropagator: Minimax Agent AI
+    Label: AIGC
+    ProduceID: "00000000000000000000000000000000"
+    PropagateID: "00000000000000000000000000000000"
+    ReservedCode1: 3045022000b8540e42d5b61a57ed43c04ec8c34fdfb7f963dff48fc270987db50535d00e022100f0ed0a15a9469a6a2c47586dceb16e44295335b5a2573cfe26428479080c6107
+    ReservedCode2: 304502205f17d5af63cd87119acae0200c2976f642547ef9b0dbbf7f85eba907535df0c8022100a92b5c5c56c0db848c7b4b6524b2d66ef3b694bb08dd871481ba7ca3dddc9a64
+---
+
 # 🚀 Guía de Instalación como PWA - Control de Materiales
 
 ## ¿Qué es una PWA?

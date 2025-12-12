@@ -118,10 +118,10 @@ body {
 /* ===== TABS ===== */
 .tabs-container {
   display: flex;
-  gap: var(--space-sm);
+  flex-wrap: wrap;
+  gap: var(--space-xs) var(--space-sm);
   margin-bottom: var(--space-xl);
   border-bottom: 2px solid var(--neutral-300);
-  overflow-x: auto;
   padding-bottom: var(--space-sm);
 }
 
@@ -139,7 +139,6 @@ body {
   cursor: pointer;
   border-radius: var(--radius-sm) var(--radius-sm) 0 0;
   transition: all 250ms ease-out;
-  white-space: nowrap;
   position: relative;
 }
 
@@ -525,6 +524,50 @@ body {
   color: var(--neutral-900);
   margin-bottom: var(--space-sm);
   font-size: 14px;
+}
+
+/* ===== CHECKBOX PERSONALIZADO ===== */
+.checkbox-label {
+  display: flex !important;
+  align-items: center;
+  cursor: pointer;
+  font-weight: 500 !important;
+  margin-bottom: 0 !important;
+}
+
+.checkbox-label input[type="checkbox"] {
+  display: none;
+}
+
+.checkbox-custom {
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--neutral-300);
+  border-radius: var(--radius-sm);
+  margin-right: var(--space-sm);
+  position: relative;
+  background: var(--surface-card);
+  transition: all 200ms ease-out;
+}
+
+.checkbox-label input[type="checkbox"]:checked + .checkbox-custom {
+  background: var(--primary-500);
+  border-color: var(--primary-500);
+}
+
+.checkbox-label input[type="checkbox"]:checked + .checkbox-custom::after {
+  content: '✓';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: white;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.checkbox-label:hover .checkbox-custom {
+  border-color: var(--primary-500);
 }
 
 .form-group input,

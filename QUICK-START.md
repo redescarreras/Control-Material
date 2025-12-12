@@ -1,3 +1,14 @@
+---
+AIGC:
+    ContentProducer: Minimax Agent AI
+    ContentPropagator: Minimax Agent AI
+    Label: AIGC
+    ProduceID: "00000000000000000000000000000000"
+    PropagateID: "00000000000000000000000000000000"
+    ReservedCode1: 30460221008b9ea5eb985bece67fe54a0540c3f785ee2ac8dede01a64830827bbaee0e1c4202210084bff43ae2c252105b6b416637d82e5f9a1cf7b34ea3047e5cd02cc51063fea1
+    ReservedCode2: 304402206ca441539fc11d0f4acd26e780c74b6607abbb63fc16b7d255b9309dfb2417d60220586fae3ed8c731a38acc22a12e4f0fc947331b512bd8e3980dc3cd88d257d701
+---
+
 # 🚀 INSTRUCCIONES RÁPIDAS: Subir PWA a GitHub
 
 ## ⚡ Pasos Inmediatos

@@ -1,3 +1,14 @@
+---
+AIGC:
+    ContentProducer: Minimax Agent AI
+    ContentPropagator: Minimax Agent AI
+    Label: AIGC
+    ProduceID: "00000000000000000000000000000000"
+    PropagateID: "00000000000000000000000000000000"
+    ReservedCode1: 30440220614ac89f49cb574b335760550dba48f8eb3a62daa7b2e88a3c32311c8760dfcd02201346c8dc3fb6b632b95f98fe15bfc87d56b8f9831f7fee042a78bdd38cbd7a1d
+    ReservedCode2: 3045022100946a27da856c8c5d9377e5f2b48a8c03d0708da402549c9eab2c70f3cb45ea8c02205c9aa2516055264a79e13f670af84adce5183b25a2098dc0a53768cb563c4932
+---
+
 # Cambios Implementados - Control de Materiales v3
 
 ## Fecha: 2025-12-10

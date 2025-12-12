@@ -82,6 +82,10 @@
                     <span class="tab-icon">🛡️</span>
                     Subconducto <span id="count-subconductos" class="count-badge">0</span>
                 </button>
+                <button class="tab-btn" data-tab="devoluciones">
+                    <span class="tab-icon">↩️</span>
+                    Devoluciones <span id="count-devoluciones" class="count-badge">0</span>
+                </button>
                 <button class="tab-btn" data-tab="reportes">
                     <span class="tab-icon">📊</span>
                     Reportes
@@ -209,6 +213,26 @@
                     </div>
                 </div>
 
+                <!-- Devoluciones Tab -->
+                <div id="tab-devoluciones" class="tab-content">
+                    <div class="tab-header">
+                        <h2>Control de Devoluciones</h2>
+                        <p class="tab-description">Gestión de devoluciones de bobinas y cables</p>
+                        <div class="tab-actions">
+                            <button id="btnNuevaDevolucion" class="btn btn-primary">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                                </svg>
+                                Nueva Devolución
+                            </button>
+                        </div>
+                    </div>
+                    <div id="lista-devoluciones" class="albaranes-grid">
+                        <!-- Las devoluciones se cargarán aquí dinámicamente -->
+                    </div>
+                </div>
+
                 <!-- Reportes Tab -->
                 <div id="tab-reportes" class="tab-content">
                     <div class="tab-header">
@@ -262,6 +286,14 @@
                                 <h3>Reporte de Subconductos</h3>
                                 <p>Control detallado de subconductos instalados y entradas</p>
                                 <button class="btn btn-secondary" onclick="generarReporte('subconductos')">
+                                    Descargar PDF
+                                </button>
+                            </div>
+                            <div class="reporte-card">
+                                <div class="reporte-icon">↩️</div>
+                                <h3>Reporte de Devoluciones</h3>
+                                <p>Control detallado de devoluciones de bobinas y cables</p>
+                                <button class="btn btn-primary" onclick="generarReporte('devoluciones')">
                                     Descargar PDF
                                 </button>
                             </div>
@@ -588,6 +620,81 @@
                 <div class="form-actions">
                     <button type="button" class="btn btn-secondary" onclick="cerrarModalEntradaSubconducto()">Cancelar</button>
                     <button type="submit" class="btn btn-success">Registrar Entrada</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal para Nueva Devolución -->
+    <div id="modalNuevaDevolucion" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Registrar Devolución</h2>
+                <button class="modal-close" onclick="cerrarModalDevolucion()">&times;</button>
+            </div>
+            <form id="formNuevaDevolucion" class="modal-body">
+                <div class="form-group">
+                    <label for="idObraDevolucion">ID de Obra *</label>
+                    <input type="text" id="idObraDevolucion" name="idObra" required placeholder="Ej: OBR-2024-001">
+                </div>
+                <div class="form-group">
+                    <label for="metrosBobina">Metros de la Bobina *</label>
+                    <input type="number" id="metrosBobina" name="metrosBobina" required min="0" step="0.1" placeholder="Ej: 2000.0">
+                </div>
+                <div class="form-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="entregaVacia" name="entregaVacia">
+                        <span class="checkbox-custom"></span>
+                        Entrega Vacía
+                    </label>
+                </div>
+                <div class="form-group">
+                    <label for="fechaDevolucion">Fecha de Entrega *</label>
+                    <input type="date" id="fechaDevolucion" name="fecha" required>
+                </div>
+                <div class="form-group">
+                    <label for="tipoInstalacionDevolucion">Tipo de Instalación *</label>
+                    <select id="tipoInstalacionDevolucion" name="tipoInstalacion" required>
+                        <option value="">Seleccionar tipo...</option>
+                        <option value="FTTH">FTTH (Fiber To The Home)</option>
+                        <option value="FTTN">FTTN (Fiber To The Node)</option>
+                        <option value="TESA">TESA (Telecomunicaciones)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="tipoMaterialDevolucion">Tipo de Material a Devolver *</label>
+                    <select id="tipoMaterialDevolucion" name="tipoMaterial" required>
+                        <option value="">Seleccionar tipo de material...</option>
+                        <option value="bobina_con_cable">Bobinas con cable</option>
+                        <option value="bobina_vacia">Bobina vacía</option>
+                        <option value="otro">Otro tipo de material</option>
+                    </select>
+                </div>
+                <div id="camposBobinaCable" class="form-group" style="display: none;">
+                    <div class="form-group">
+                        <label for="numeroMatriculaCable">Número de Matrícula *</label>
+                        <input type="text" id="numeroMatriculaCable" name="numeroMatriculaCable" placeholder="Ej: MAT-001-2024">
+                    </div>
+                    <div class="form-group">
+                        <label for="metrosCableBobina">Metros de Cable *</label>
+                        <input type="number" id="metrosCableBobina" name="metrosCableBobina" min="0" step="0.1" placeholder="Ej: 1800.5">
+                    </div>
+                </div>
+                <div id="camposBobinaVacia" class="form-group" style="display: none;">
+                    <label for="numeroMatriculaVacia">Número de Matrícula *</label>
+                    <input type="text" id="numeroMatriculaVacia" name="numeroMatriculaVacia" placeholder="Ej: MAT-002-2024">
+                </div>
+                <div id="camposOtroMaterial" class="form-group" style="display: none;">
+                    <label for="descripcionOtroMaterial">Descripción del Material *</label>
+                    <input type="text" id="descripcionOtroMaterial" name="descripcionOtroMaterial" required placeholder="Ej: Cables de conexión, conectores, etc.">
+                </div>
+                <div class="form-group">
+                    <label for="observacionesDevolucion">Observaciones</label>
+                    <textarea id="observacionesDevolucion" name="observaciones" rows="3" placeholder="Observaciones adicionales (opcional)"></textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="cerrarModalDevolucion()">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Registrar Devolución</button>
                 </div>
             </form>
         </div>
