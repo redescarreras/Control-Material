@@ -7,15 +7,25 @@ let devoluciones = [];
 
 // ===== INICIALIZACIÓN =====
 document.addEventListener('DOMContentLoaded', function() {
+    // Cargar todos los datos primero
     cargarAlbaranes();
     cargarMateriales();
     cargarDevoluciones();
+    
+    // Configurar event listeners
     configurarEventListeners();
     establecerFechaActual();
-    actualizarContadores();
+    
+    // Mostrar datos y actualizar contadores con un pequeño delay para asegurar que todo esté cargado
     mostrarAlbaranes();
     actualizarStockDisplay('cable');
     actualizarStockDisplay('subconducto');
+    
+    // Actualizar contadores después de un pequeño delay para asegurar sincronización
+    setTimeout(() => {
+        actualizarContadores();
+        console.log('🔄 Contadores actualizados al cargar página');
+    }, 100);
 });
 
 // ===== GESTIÓN DE ALBARANES =====
@@ -186,6 +196,9 @@ function cambiarTab(tab) {
     });
     document.getElementById(`tab-${tab}`).classList.add('active');
 
+    // Actualizar contadores siempre que se cambie de pestaña
+    actualizarContadores();
+
     // Actualizar contenido mostrado
     if (tab === 'cables') {
         mostrarMateriales('cable');
@@ -201,6 +214,11 @@ function cambiarTab(tab) {
 }
 
 function actualizarContadores() {
+    // Obtener datos actualizados desde localStorage
+    cargarAlbaranes();
+    cargarMateriales();
+    cargarDevoluciones();
+    
     const pendientes = albaranes.filter(a => a.estado === 'pendiente').length;
     const recibidos = albaranes.filter(a => a.estado === 'recibido').length;
     const faltantes = albaranes.filter(a => a.estado === 'faltante').length;
@@ -208,12 +226,38 @@ function actualizarContadores() {
     const subconductoCount = subconductos.length;
     const devolucionCount = devoluciones.length;
 
-    document.getElementById('count-pendientes').textContent = pendientes;
-    document.getElementById('count-recibidos').textContent = recibidos;
-    document.getElementById('count-faltantes').textContent = faltantes;
-    document.getElementById('count-cables').textContent = cableCount;
-    document.getElementById('count-subconductos').textContent = subconductoCount;
-    document.getElementById('count-devoluciones').textContent = devolucionCount;
+    // Actualizar elementos con verificación de existencia
+    const elements = {
+        'count-pendientes': pendientes,
+        'count-recibidos': recibidos,
+        'count-faltantes': faltantes,
+        'count-cables': cableCount,
+        'count-subconductos': subconductoCount,
+        'count-devoluciones': devolucionCount
+    };
+
+    for (const [id, valor] of Object.entries(elements)) {
+        const element = document.getElementById(id);
+        if (element) {
+            element.textContent = valor;
+        } else {
+            console.warn(`⚠️ Elemento con ID '${id}' no encontrado en el DOM`);
+        }
+    }
+    
+    // Debug info
+    console.log('📊 Contadores actualizados:', {
+        pendientes,
+        recibidos,
+        faltantes,
+        cables: cableCount,
+        subconductos: subconductoCount,
+        devoluciones: devolucionCount,
+        totalAlbaranes: albaranes.length,
+        totalCables: cables.length,
+        totalSubconductos: subconductos.length,
+        totalDevoluciones: devoluciones.length
+    });
 }
 
 // ===== GESTIÓN DE ALBARANES =====
