@@ -1349,14 +1349,17 @@ function generarReporteMateriales(tipoMaterial) {
         doc.setFontSize(10);
         doc.setTextColor(255, 255, 255);
         doc.setFillColor(255, 85, 0);
-        doc.rect(20, yPos - 8, 170, 8, 'F');
+        doc.rect(20, yPos - 8, 190, 8, 'F');
         
-        doc.text('ID', 22, yPos - 2);
-        doc.text('Tipo', 45, yPos - 2);
-        doc.text('Acción', 100, yPos - 2);
-        doc.text('Metros', 130, yPos - 2);
-        doc.text('Fecha', 155, yPos - 2);
-        doc.text('Obra', 180, yPos - 2);
+        doc.text('ID Obra', 22, yPos - 2);
+        if (tipoMaterial === 'cable') {
+            doc.text('Tipo', 65, yPos - 2);
+            doc.text('Metros', 145, yPos - 2);
+        } else {
+            doc.text('Fecha', 65, yPos - 2);
+            doc.text('Tipo', 95, yPos - 2);
+            doc.text('Metros', 160, yPos - 2);
+        }
         
         yPos += 12;
         
@@ -1371,7 +1374,7 @@ function generarReporteMateriales(tipoMaterial) {
             // Alternar colores de fondo
             if (index % 2 === 0) {
                 doc.setFillColor(245, 241, 230);
-                doc.rect(20, yPos - 8, 170, 8, 'F');
+                doc.rect(20, yPos - 8, 190, 8, 'F');
             }
             
             const tipo = material.tipoCable || material.tipoSubconducto || 'N/A';
@@ -1380,15 +1383,18 @@ function generarReporteMateriales(tipoMaterial) {
             const obra = material.idObra || '-';
             
             // Ajustar texto
-            const tipoText = tipo.length > 20 ? tipo.substring(0, 20) + '...' : tipo;
-            const obraText = obra.length > 8 ? obra.substring(0, 8) + '...' : obra;
+            const tipoText = tipo.length > 35 ? tipo.substring(0, 35) + '...' : tipo;
+            const obraText = obra;
             
-            doc.text(material.id, 22, yPos - 2);
-            doc.text(tipoText, 45, yPos - 2);
-            doc.text(accion, 100, yPos - 2);
-            doc.text(`${material.metros}m`, 130, yPos - 2);
-            doc.text(fecha, 155, yPos - 2);
-            doc.text(obraText, 180, yPos - 2);
+            doc.text(obraText, 22, yPos - 2);
+            if (tipoMaterial === 'cable') {
+                doc.text(tipoText, 65, yPos - 2);
+                doc.text(`${material.metros}m`, 145, yPos - 2);
+            } else {
+                doc.text(fecha, 65, yPos - 2);
+                doc.text(tipoText, 95, yPos - 2);
+                doc.text(`${material.metros}m`, 160, yPos - 2);
+            }
             
             yPos += 8;
         });
@@ -1586,9 +1592,7 @@ function generarReporte(tipo) {
         
         doc.text('ID Obra', 22, yPos - 2);
         doc.text('Fecha', 85, yPos - 2);
-        doc.text('Tipo', 120, yPos - 2);
-        doc.text('Estado', 150, yPos - 2);
-        doc.text('Cuenta', 175, yPos - 2);
+        doc.text('Tipo', 145, yPos - 2);
         
         yPos += 12;
         
@@ -1616,9 +1620,7 @@ function generarReporte(tipo) {
             
             doc.text(obraText, 22, yPos - 2);
             doc.text(fecha, 85, yPos - 2);
-            doc.text(albaran.tipoInstalacion, 120, yPos - 2);
-            doc.text(estado, 150, yPos - 2);
-            doc.text(cuentaText, 175, yPos - 2);
+            doc.text(albaran.tipoInstalacion, 145, yPos - 2);
             
             yPos += 8;
         });
@@ -1676,11 +1678,11 @@ function generarReporte(tipo) {
             
         case 'cables':
             generarReporteMateriales('cable');
-            break;
+            return;
             
         case 'subconductos':
             generarReporteMateriales('subconducto');
-            break;
+            return;
             
         case 'devoluciones':
             generarReporteDevoluciones();
