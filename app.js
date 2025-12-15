@@ -639,10 +639,6 @@ function agregarBobina() {
             </div>
             <div class="campos-bobina">
                 <div class="form-group">
-                    <label for="metrosBobina_${bobinaIndex}">Metros de la Bobina *</label>
-                    <input type="number" id="metrosBobina_${bobinaIndex}" name="metrosBobina_${bobinaIndex}" required min="0" step="0.1" placeholder="Ej: 2000.0">
-                </div>
-                <div class="form-group">
                     <label class="checkbox-label">
                         <input type="checkbox" id="entregaVacia_${bobinaIndex}" name="entregaVacia_${bobinaIndex}">
                         <span class="checkbox-custom"></span>
@@ -716,9 +712,59 @@ function agregarBobina() {
                     <input type="number" id="metrosCable_${bobinaIndex}" name="metrosCable_${bobinaIndex}" min="0" step="0.1" placeholder="Ej: 1800.5">
                 </div>
             </div>
-            <div id="camposBobinaVacia_${bobinaIndex}" class="form-group" style="display: none;">
-                <label for="numeroMatriculaVacia_${bobinaIndex}">Número de Matrícula *</label>
-                <input type="text" id="numeroMatriculaVacia_${bobinaIndex}" name="numeroMatriculaVacia_${bobinaIndex}" placeholder="Ej: MAT-002-2024">
+            <div id="camposBobinaVacia_${bobinaIndex}" class="campos-bobina" style="display: none;">
+                <div class="form-group">
+                    <label for="tipoCableDevolucionVacia_${bobinaIndex}">Tipo de Cable *</label>
+                    <select id="tipoCableDevolucionVacia_${bobinaIndex}" name="tipoCableDevolucionVacia_${bobinaIndex}">
+                        <option value="">Seleccionar tipo de cable...</option>
+                        <option value="Cable de f.o. de exterior PKP holgado de 8 fo.">Cable de f.o. de exterior PKP holgado de 8 fo.</option>
+                        <option value="Cable de f.o. de exterior PKP holgado de 16 fo.">Cable de f.o. de exterior PKP holgado de 16 fo.</option>
+                        <option value="Cable de f.o. de exterior PKP holgado de 24 fo.">Cable de f.o. de exterior PKP holgado de 24 fo.</option>
+                        <option value="Cable de f.o. de exterior PKP holgado de 32 fo.">Cable de f.o. de exterior PKP holgado de 32 fo.</option>
+                        <option value="Cable de f.o. de exterior PKP holgado de 48 fo.">Cable de f.o. de exterior PKP holgado de 48 fo.</option>
+                        <option value="Cable de f.o. de exterior PKP holgado de 64 fo.">Cable de f.o. de exterior PKP holgado de 64 fo.</option>
+                        <option value="Cable de f.o. de exterior PKP holgado de 128 fo.">Cable de f.o. de exterior PKP holgado de 128 fo.</option>
+                        <option value="Cable de f.o. de exterior PKP holgado de 256 fo.">Cable de f.o. de exterior PKP holgado de 256 fo.</option>
+                        <option value="Cable de f.o. de exterior PKP holgado de 512 fo.">Cable de f.o. de exterior PKP holgado de 512 fo.</option>
+                        <option value="Cable de f.o. de exterior KP holgado de 768 fo.">Cable de f.o. de exterior KP holgado de 768 fo.</option>
+                        <option value="Cable de f.o. de exterior KP compacto de 864 fo.">Cable de f.o. de exterior KP compacto de 864 fo.</option>
+                        <option value="Cable de f.o. de exterior KP compacto de 912 fo.">Cable de f.o. de exterior KP compacto de 912 fo.</option>
+                        <option value="Cable de f.o. de interior KT de 8 fo.">Cable de f.o. de interior KT de 8 fo.</option>
+                        <option value="Cable de f.o. de interior KT de 16 fo.">Cable de f.o. de interior KT de 16 fo.</option>
+                        <option value="Cable de f.o. de interior KT de 24 fo.">Cable de f.o. de interior KT de 24 fo.</option>
+                        <option value="Cable de f.o. de interior KT de 32 fo.">Cable de f.o. de interior KT de 32 fo.</option>
+                        <option value="Cable de f.o. de interior KT de 48 fo.">Cable de f.o. de interior KT de 48 fo.</option>
+                        <option value="Cable de f.o. de interior KT de 64 fo.">Cable de f.o. de interior KT de 64 fo.</option>
+                        <option value="Cable de f.o. de interior KT de 128 fo.">Cable de f.o. de interior KT de 128 fo.</option>
+                        <option value="Cable de f.o. de interior KT de 256 fo.">Cable de f.o. de interior KT de 256 fo.</option>
+                        <option value="Cable de f.o. de interior KT de 512 fo.">Cable de f.o. de interior KT de 512 fo.</option>
+                        <option value="Cable de f.o. 8 VT.">Cable de f.o. 8 VT.</option>
+                        <option value="Cable de f.o. 16 VT.">Cable de f.o. 16 VT.</option>
+                        <option value="Cable de f.o. 32 VT.">Cable de f.o. 32 VT.</option>
+                        <option value="Cable de f.o. 64 VT.">Cable de f.o. 64 VT.</option>
+                        <option value="Cable KT 8 fo G.652.D monotubo BLANCO">Cable KT 8 fo G.652.D monotubo BLANCO</option>
+                        <option value="Cable KP 16 fo G.652.D (4x4f+2e) BLANCO">Cable KP 16 fo G.652.D (4x4f+2e) BLANCO</option>
+                        <option value="Cable FVT micromódulos 16 fo G.657 A2 (4x4f) BLANCO">Cable FVT micromódulos 16 fo G.657 A2 (4x4f) BLANCO</option>
+                        <option value="Cable KP 32 fo G.652.D (8x4f) BLANCO">Cable KP 32 fo G.652.D (8x4f) BLANCO</option>
+                        <option value="Cable FVT micromódulos 32 fo G.657 A2 (8x4f) BLANCO">Cable FVT micromódulos 32 fo G.657 A2 (8x4f) BLANCO</option>
+                        <option value="Cable KP 64 fo G.652.D (8x8f) BLANCO">Cable KP 64 fo G.652.D (8x8f) BLANCO</option>
+                        <option value="Cable FVT micromódulos 64 fo G.657 A2 (8x8f) BLANCO">Cable FVT micromódulos 64 fo G.657 A2 (8x8f) BLANCO</option>
+                        <option value="Cable de f.o. de interior riser de 16 fo.">Cable de f.o. de interior riser de 16 fo.</option>
+                        <option value="Cable de f.o. de interior riser de 24 fo.">Cable de f.o. de interior riser de 24 fo.</option>
+                        <option value="Cable de f.o. de interior riser de 32 fo.">Cable de f.o. de interior riser de 32 fo.</option>
+                        <option value="Cable de f.o. de interior riser de 48 fo.">Cable de f.o. de interior riser de 48 fo.</option>
+                        <option value="Cable de f.o. de exterior KP holgado de 16 fo.">Cable de f.o. de exterior KP holgado de 16 fo.</option>
+                        <option value="Cable de f.o. de exterior KP holgado de 32 fo.">Cable de f.o. de exterior KP holgado de 32 fo.</option>
+                        <option value="Cable de f.o. de exterior KP holgado de 64 fo.">Cable de f.o. de exterior KP holgado de 64 fo.</option>
+                        <option value="Cable de f.o. de exterior KP holgado de 128 fo.">Cable de f.o. de exterior KP holgado de 128 fo.</option>
+                        <option value="Cable de f.o. de exterior riser de 16 fo.">Cable de f.o. de exterior riser de 16 fo.</option>
+                        <option value="Cable de f.o. de exterior riser de 32 fo.">Cable de f.o. de exterior riser de 32 fo.</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="numeroMatriculaVacia_${bobinaIndex}">Número de Matrícula *</label>
+                    <input type="text" id="numeroMatriculaVacia_${bobinaIndex}" name="numeroMatriculaVacia_${bobinaIndex}" placeholder="Ej: MAT-002-2024">
+                </div>
             </div>
             <div id="camposOtroMaterial_${bobinaIndex}" class="form-group" style="display: none;">
                 <label for="descripcionOtroMaterial_${bobinaIndex}">Descripción del Material *</label>
@@ -728,6 +774,29 @@ function agregarBobina() {
     `;
     
     container.insertAdjacentHTML('beforeend', bobinaHTML);
+    
+    // Agregar event listener para el checkbox de entrega vacía
+    const checkboxEntregaVacia = document.getElementById(`entregaVacia_${bobinaIndex}`);
+    const tipoMaterialSelect = document.getElementById(`tipoMaterial_${bobinaIndex}`);
+    
+    checkboxEntregaVacia.addEventListener('change', function() {
+        if (this.checked) {
+            // Si se marca "entrega vacía", configurar automáticamente
+            tipoMaterialSelect.value = 'bobina_vacia';
+            checkboxEntregaVacia.checked = true; // Asegurar que el checkbox esté marcado
+            toggleCamposMaterial(bobinaIndex);
+        } else {
+            // Si se desmarca, limpiar el tipo de material
+            tipoMaterialSelect.value = '';
+            checkboxEntregaVacia.checked = false; // Asegurar que el checkbox esté desmarcado
+            toggleCamposMaterial(bobinaIndex);
+        }
+    });
+    
+    // También agregar event listener para el select de tipo de material
+    tipoMaterialSelect.addEventListener('change', function() {
+        toggleCamposMaterial(bobinaIndex);
+    });
 }
 
 function eliminarBobina(bobinaIndex) {
@@ -795,19 +864,28 @@ function renumerarBobinas() {
 function toggleCamposMaterial(bobinaIndex) {
     const tipoMaterial = document.getElementById(`tipoMaterial_${bobinaIndex}`).value;
     
-    // Ocultar todos los campos
+    // Ocultar todos los campos y remover required de todos
     document.getElementById(`camposBobinaCable_${bobinaIndex}`).style.display = 'none';
     document.getElementById(`camposBobinaVacia_${bobinaIndex}`).style.display = 'none';
     document.getElementById(`camposOtroMaterial_${bobinaIndex}`).style.display = 'none';
+    
+    // Remover required de TODOS los campos
+    document.getElementById(`tipoCableDevolucion_${bobinaIndex}`).required = false;
+    document.getElementById(`numeroMatriculaCable_${bobinaIndex}`).required = false;
+    document.getElementById(`metrosCable_${bobinaIndex}`).required = false;
+    document.getElementById(`tipoCableDevolucionVacia_${bobinaIndex}`).required = false;
+    document.getElementById(`numeroMatriculaVacia_${bobinaIndex}`).required = false;
+    document.getElementById(`descripcionOtroMaterial_${bobinaIndex}`).required = false;
     
     // Limpiar valores
     document.getElementById(`tipoCableDevolucion_${bobinaIndex}`).value = '';
     document.getElementById(`numeroMatriculaCable_${bobinaIndex}`).value = '';
     document.getElementById(`metrosCable_${bobinaIndex}`).value = '';
+    document.getElementById(`tipoCableDevolucionVacia_${bobinaIndex}`).value = '';
     document.getElementById(`numeroMatriculaVacia_${bobinaIndex}`).value = '';
     document.getElementById(`descripcionOtroMaterial_${bobinaIndex}`).value = '';
     
-    // Mostrar campos según la selección
+    // Mostrar campos según la selección y agregar required solo a los visibles
     switch(tipoMaterial) {
         case 'bobina_con_cable':
             document.getElementById(`camposBobinaCable_${bobinaIndex}`).style.display = 'grid';
@@ -816,7 +894,8 @@ function toggleCamposMaterial(bobinaIndex) {
             document.getElementById(`metrosCable_${bobinaIndex}`).required = true;
             break;
         case 'bobina_vacia':
-            document.getElementById(`camposBobinaVacia_${bobinaIndex}`).style.display = 'block';
+            document.getElementById(`camposBobinaVacia_${bobinaIndex}`).style.display = 'grid';
+            document.getElementById(`tipoCableDevolucionVacia_${bobinaIndex}`).required = true;
             document.getElementById(`numeroMatriculaVacia_${bobinaIndex}`).required = true;
             break;
         case 'otro':
@@ -843,20 +922,19 @@ function crearDevolucion(e) {
     
     bobinas.forEach((bobina, index) => {
         const bobinaIndex = index + 1;
-        const metrosBobina = parseFloat(formData.get(`metrosBobina_${bobinaIndex}`)) || 0;
         const entregaVacia = formData.get(`entregaVacia_${bobinaIndex}`) === 'on';
         const tipoMaterial = formData.get(`tipoMaterial_${bobinaIndex}`);
         
-        if (!metrosBobina || !tipoMaterial) {
-            mostrarToast(`Complete todos los campos requeridos de la bobina ${bobinaIndex}`, 'error');
+        if (!tipoMaterial) {
+            mostrarToast(`Complete el tipo de material para la bobina ${bobinaIndex}`, 'error');
             return;
         }
         
         const bobinaData = {
-            metrosBobina,
             entregaVacia,
             tipoMaterial,
             tipoCableDevolucion: formData.get(`tipoCableDevolucion_${bobinaIndex}`) || '',
+            tipoCableDevolucionVacia: formData.get(`tipoCableDevolucionVacia_${bobinaIndex}`) || '',
             numeroMatriculaCable: formData.get(`numeroMatriculaCable_${bobinaIndex}`) || '',
             metrosCableBobina: parseFloat(formData.get(`metrosCable_${bobinaIndex}`)) || 0,
             numeroMatriculaVacia: formData.get(`numeroMatriculaVacia_${bobinaIndex}`) || '',
@@ -869,8 +947,8 @@ function crearDevolucion(e) {
             return;
         }
         
-        if (tipoMaterial === 'bobina_vacia' && !bobinaData.numeroMatriculaVacia) {
-            mostrarToast(`Complete el número de matrícula para la bobina ${bobinaIndex}`, 'error');
+        if (tipoMaterial === 'bobina_vacia' && (!bobinaData.tipoCableDevolucionVacia || !bobinaData.numeroMatriculaVacia)) {
+            mostrarToast(`Complete el tipo de cable y número de matrícula para la bobina ${bobinaIndex}`, 'error');
             return;
         }
         
@@ -986,7 +1064,7 @@ function crearTarjetaDevolucion(devolucion) {
                 <div style="font-weight: 600; color: var(--primary-500); margin-bottom: var(--space-sm);">Bobina ${index + 1}</div>
                 <div class="info-row">
                     <span class="info-label">Metros Bobina:</span>
-                    <span class="info-value">${bobina.metrosBobina} m</span>
+                    <span class="info-value">${bobina.tipoMaterial === 'bobina_con_cable' ? bobina.metrosCableBobina + ' m' : '0 m'}</span>
                 </div>
                 <div class="info-row">
                     <span class="info-label">Entrega Vacía:</span>
@@ -1349,17 +1427,14 @@ function generarReporteMateriales(tipoMaterial) {
         doc.setFontSize(10);
         doc.setTextColor(255, 255, 255);
         doc.setFillColor(255, 85, 0);
-        doc.rect(20, yPos - 8, 190, 8, 'F');
+        doc.rect(20, yPos - 8, 170, 8, 'F');
         
-        doc.text('ID Obra', 22, yPos - 2);
-        if (tipoMaterial === 'cable') {
-            doc.text('Tipo', 65, yPos - 2);
-            doc.text('Metros', 145, yPos - 2);
-        } else {
-            doc.text('Fecha', 65, yPos - 2);
-            doc.text('Tipo', 95, yPos - 2);
-            doc.text('Metros', 160, yPos - 2);
-        }
+        doc.text('ID', 22, yPos - 2);
+        doc.text('Tipo', 45, yPos - 2);
+        doc.text('Acción', 100, yPos - 2);
+        doc.text('Metros', 130, yPos - 2);
+        doc.text('Fecha', 155, yPos - 2);
+        doc.text('Obra', 180, yPos - 2);
         
         yPos += 12;
         
@@ -1374,7 +1449,7 @@ function generarReporteMateriales(tipoMaterial) {
             // Alternar colores de fondo
             if (index % 2 === 0) {
                 doc.setFillColor(245, 241, 230);
-                doc.rect(20, yPos - 8, 190, 8, 'F');
+                doc.rect(20, yPos - 8, 170, 8, 'F');
             }
             
             const tipo = material.tipoCable || material.tipoSubconducto || 'N/A';
@@ -1383,18 +1458,15 @@ function generarReporteMateriales(tipoMaterial) {
             const obra = material.idObra || '-';
             
             // Ajustar texto
-            const tipoText = tipo.length > 35 ? tipo.substring(0, 35) + '...' : tipo;
-            const obraText = obra;
+            const tipoText = tipo.length > 20 ? tipo.substring(0, 20) + '...' : tipo;
+            const obraText = obra.length > 8 ? obra.substring(0, 8) + '...' : obra;
             
-            doc.text(obraText, 22, yPos - 2);
-            if (tipoMaterial === 'cable') {
-                doc.text(tipoText, 65, yPos - 2);
-                doc.text(`${material.metros}m`, 145, yPos - 2);
-            } else {
-                doc.text(fecha, 65, yPos - 2);
-                doc.text(tipoText, 95, yPos - 2);
-                doc.text(`${material.metros}m`, 160, yPos - 2);
-            }
+            doc.text(material.id, 22, yPos - 2);
+            doc.text(tipoText, 45, yPos - 2);
+            doc.text(accion, 100, yPos - 2);
+            doc.text(`${material.metros}m`, 130, yPos - 2);
+            doc.text(fecha, 155, yPos - 2);
+            doc.text(obraText, 180, yPos - 2);
             
             yPos += 8;
         });
@@ -1592,7 +1664,9 @@ function generarReporte(tipo) {
         
         doc.text('ID Obra', 22, yPos - 2);
         doc.text('Fecha', 85, yPos - 2);
-        doc.text('Tipo', 145, yPos - 2);
+        doc.text('Tipo', 120, yPos - 2);
+        doc.text('Estado', 150, yPos - 2);
+        doc.text('Cuenta', 175, yPos - 2);
         
         yPos += 12;
         
@@ -1620,7 +1694,9 @@ function generarReporte(tipo) {
             
             doc.text(obraText, 22, yPos - 2);
             doc.text(fecha, 85, yPos - 2);
-            doc.text(albaran.tipoInstalacion, 145, yPos - 2);
+            doc.text(albaran.tipoInstalacion, 120, yPos - 2);
+            doc.text(estado, 150, yPos - 2);
+            doc.text(cuentaText, 175, yPos - 2);
             
             yPos += 8;
         });
@@ -1678,11 +1754,11 @@ function generarReporte(tipo) {
             
         case 'cables':
             generarReporteMateriales('cable');
-            return;
+            break;
             
         case 'subconductos':
             generarReporteMateriales('subconducto');
-            return;
+            break;
             
         case 'devoluciones':
             generarReporteDevoluciones();
