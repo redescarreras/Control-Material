@@ -13,7 +13,34 @@
       "estado": "pendiente",
       "fechaCreacion": "2024-12-12T10:00:00.000Z",
       "fechaRecepcion": null,
-      "materialFaltante": null
+      "materialFaltante": null,
+      "archivo": {
+        "nombre": "albaran_fibra_optica.pdf",
+        "tipo": "application/pdf",
+        "tamaño": 245760,
+        "fechaSubida": "2024-12-12T10:05:00.000Z",
+        "base64": "data:application/pdf;base64,JVBERi0xLjQKJdPr6eEKMSAwIG9iago8PC9UeXBlIC9DYXRhbG9nIC9QYWdlcyAyIDAgUiA+PgplbmRvYmoKMiAwIG9iago8PC9UeXBlIC9QYWdlcyAvS2lkcyBbMyAwIFJdIC9Db3VudCAxID4+CmVuZG9iagozIDAgb2JqCjw8L1R5cGUgL1BhZ2UgL1BhcmVudCAyIDAgUiAvTWVkaWFCb3ggWzAgMCA2MTIgNzkyXSAvQ29udGVudHMgNCAwIFIgL1Jlc291cmNlcyA8PC9Gb250IDw8L0YxIDkgMCBSID4+ID4+ID4+CmVuZG9iago0IDAgb2JqCjw8L0xlbmd0aCAzNSA+PgpzdHJlYW0KQlQKL0YxIDEyIFRmCjcyIDcyMCBUZAooQUxCQVJBTiBERSBGSUJSQSBPVElDQSkgVGoKRVQKQlQKL0YxIDEyIFRmCjEwMCA3MjAgVGoKKElEIE9icmE6IE9CUi0yMDI0LTAwMSkgVGoKRVQKQlQKL0YxIDEyIFRmCjEwMCA3NDAgVGoKKEN1ZW50YSBDYXJnbyA6IENDLTAwMS0yMDI0KSBUagpFVApCVAovRjEgMTIgVGYKMTAwIDc2MCBUagooVGlwbyBJbnN0YWxhY2nDs246IEZUVEgpIFRqCkVUCkJUCi9GMSAxMiBUZgoxMDAgNzgwIFRqCihKZWZlIERlIE9icmE6IEp1YW4gUMOhcmV6KSBUagpFVApCVAovRjEgMTIgVGYKMTAwIDgwMCBUagooT2JzZXJ2YWNpb25lczogSW5zdGFsYWNpw7NuIGRlIGZpYnJhIE7DsXB0aWNhKSBUagpFVApCVAovRjEgMTIgVGYKMTAwIDgyMCBUagooQUxCQVJBTCBOR1JPLEBGSVJSQSBPVElDQSkgVGoKRVQKZW5kc3RyZWFtCmVuZG9iago1IDAgb2JqCjw8L1R5cGUgL0ZvbnQgL1N1YnR5cGUgL1R5cGUxIC9CYXNlRm9udCAvSGVsdmV0aWNhID4+CmVuZG9iago2IDAgb2JqCjw8L1R5cGUgL0ZvbnREZXNjcmlwdG9yIC9Gb250TmFtZSAvSGVsdmV0aWNhID4+CmVuZG9iago3IDAgb2JqCjw8L1R5cGUgL0ZvbnQgL1N1YnR5cGUgL1R5cGUxIC9CYXNlRm9udCAvSGVsdmV0aWNhID4+CmVuZG9iago4IDAgb2JqCjw8L1R5cGUgL0ZvbnREZXNjcmlwdG9yIC9Gb250TmFtZSAvSGVsdmV0aWNhID4+CmVuZG9iago5IDAgb2JqCjw8L1R5cGUgL0ZvbnQgL1N1YnR5cGUgL1R5cGUxIC9CYXNlRm9udCAvSGVsdmV0aWNhID4+CmVuZG9iagp4cmVmCjAgMTQKMDAwMDAwMDAwMCA2NTUzNSBmIAowMDAwMDAwMTEwIDAwMDAwIG4gCjAwMDAwMDAxMTUgMDAwMDAgbiAKMDAwMDAwMDE1NiAwMDAwMCBuIAowMDAwMDAwMjQ3IDAwMDAwIG4gCjAwMDAwMDAzMjQgMDAwMDAgbiAKMDAwMDAwMDM4OCAwMDAwMCBuIAowMDAwMDAwNDU0IDAwMDAwIG4gCjAwMDAwMDA1NjEgMDAwMDAgbiAKdHJhaWxlcgo8PC9TaXplIDE0IC9Sb290IDEgMCBSID4+CnN0YXJ0eHJlZgo0OTAKJSVFT0YK"
+      }
+    },
+    {
+      "id": "ALB-20241212-002",
+      "idObra": "OBR-2024-002",
+      "fecha": "2024-12-12",
+      "cuentaCargo": "CC-002-2024",
+      "tipoInstalacion": "FTTN",
+      "jefeObra": "María García",
+      "observaciones": "Instalación de cables de cobre",
+      "estado": "recibido",
+      "fechaCreacion": "2024-12-12T14:30:00.000Z",
+      "fechaRecepcion": "2024-12-13T09:15:00.000Z",
+      "materialFaltante": null,
+      "archivo": {
+        "nombre": "inventario_materiales.xlsx",
+        "tipo": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        "tamaño": 156432,
+        "fechaSubida": "2024-12-12T14:35:00.000Z",
+        "base64": "data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,UEsDBBQAAAAIAA=="
+      }
     }
   ],
   "cables": [

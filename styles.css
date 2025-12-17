@@ -1265,3 +1265,112 @@ body {
     justify-content: center;
   }
 }
+
+/* ===== ESTILOS PARA VISUALIZACIÓN DE ARCHIVOS ===== */
+#modalVerArchivo {
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(0, 0, 0, 0.8);
+  z-index: 10000;
+}
+
+#modalVerArchivo .modal-content {
+  max-width: 95%;
+  max-height: 95%;
+  background: var(--surface-card);
+  border-radius: 12px;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+#modalVerArchivo .modal-header {
+  background: linear-gradient(135deg, var(--primary-500), var(--primary-700));
+  color: white;
+  padding: 20px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+#modalVerArchivo .modal-header h3 {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+#modalVerArchivo .modal-close {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: background-color 0.2s;
+}
+
+#modalVerArchivo .modal-close:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+#modalVerArchivo .modal-body {
+  flex: 1;
+  overflow-y: auto;
+}
+
+#modalVerArchivo .modal-footer {
+  background-color: var(--neutral-100);
+  border-top: 1px solid var(--neutral-300);
+  padding: 16px 24px;
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+}
+
+#modalVerArchivo .modal-footer .btn {
+  padding: 8px 16px;
+  font-size: 0.875rem;
+  border-radius: 6px;
+}
+
+#modalVerArchivo .btn-info {
+  background: #17a2b8;
+  color: white;
+}
+
+#modalVerArchivo .btn-info:hover {
+  background: #138496;
+}
+
+/* Mejoras para albaran-actions con archivo */
+.albaran-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.albaran-actions .btn {
+  padding: 8px 12px;
+  font-size: 0.875rem;
+  border-radius: 6px;
+  white-space: nowrap;
+}
+
+.albaran-actions .btn-info {
+  background: #17a2b8;
+  color: white;
+  border: none;
+}
+
+.albaran-actions .btn-info:hover {
+  background: #138496;
+  transform: translateY(-1px);
+}

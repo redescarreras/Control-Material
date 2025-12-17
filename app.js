@@ -286,6 +286,32 @@ function crearAlbaran(e) {
     e.preventDefault();
     
     const formData = new FormData(e.target);
+    const archivoInput = document.getElementById('archivoAlbaran');
+    const archivo = archivoInput.files[0];
+    
+    // Procesar archivo si se subió
+    let archivoInfo = null;
+    if (archivo) {
+        archivoInfo = {
+            nombre: archivo.name,
+            tipo: archivo.type,
+            tamaño: archivo.size,
+            fechaSubida: new Date().toISOString()
+        };
+        
+        // Convertir archivo a base64 para almacenamiento
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            archivoInfo.base64 = e.target.result;
+            completarCreacionAlbaran(formData, archivoInfo);
+        };
+        reader.readAsDataURL(archivo);
+    } else {
+        completarCreacionAlbaran(formData, archivoInfo);
+    }
+}
+
+function completarCreacionAlbaran(formData, archivoInfo) {
     const albaran = {
         id: generarIdAlbaran(),
         idObra: formData.get('idObra'),
@@ -297,7 +323,8 @@ function crearAlbaran(e) {
         estado: 'pendiente',
         fechaCreacion: new Date().toISOString(),
         fechaRecepcion: null,
-        materialFaltante: null
+        materialFaltante: null,
+        archivo: archivoInfo
     };
 
     albaranes.push(albaran);
@@ -398,10 +425,20 @@ function crearTarjetaAlbaran(albaran) {
         `;
     }
 
+    let archivoHtml = '';
+    if (albaran.archivo) {
+        archivoHtml = `
+            <button class="btn btn-info" onclick="verArchivoAlbaran('${albaran.id}')" title="Ver archivo del albarán">
+                📄 Ver Albarán
+            </button>
+        `;
+    }
+
     let accionesHtml = '';
     if (albaran.estado === 'pendiente') {
         accionesHtml = `
             <div class="albaran-actions">
+                ${archivoHtml}
                 <button class="btn btn-success" onclick="abrirModalRecepcion('${albaran.id}')">
                     ✅ Material Recibido
                 </button>
@@ -413,6 +450,7 @@ function crearTarjetaAlbaran(albaran) {
     } else if (tieneMaterialFaltante) {
         accionesHtml = `
             <div class="albaran-actions">
+                ${archivoHtml}
                 <button class="btn btn-success" onclick="marcarFaltanteRecibido('${albaran.id}')">
                     ✅ Material Faltante Recibido
                 </button>
@@ -424,6 +462,7 @@ function crearTarjetaAlbaran(albaran) {
     } else {
         accionesHtml = `
             <div class="albaran-actions">
+                ${archivoHtml}
                 <button class="btn btn-secondary" onclick="eliminarAlbaran('${albaran.id}')">
                     🗑️ Eliminar
                 </button>
@@ -469,6 +508,117 @@ function crearTarjetaAlbaran(albaran) {
     `;
 }
 
+function verArchivoAlbaran(albaranId) {
+    const albaran = albaranes.find(a => a.id === albaranId);
+    if (!albaran || !albaran.archivo) {
+        mostrarToast('No se encontró el archivo del albarán', 'error');
+        return;
+    }
+
+    const archivo = albaran.archivo;
+    
+    // Crear modal para mostrar el archivo
+    const modalHtml = `
+        <div id="modalVerArchivo" class="modal" style="display: flex;">
+            <div class="modal-content" style="max-width: 90%; max-height: 90%; width: auto; height: auto;">
+                <div class="modal-header">
+                    <h3>📄 ${archivo.nombre}</h3>
+                    <button type="button" class="modal-close" onclick="cerrarModalVerArchivo()">&times;</button>
+                </div>
+                <div class="modal-body" style="padding: 20px; max-height: 70vh; overflow: auto;">
+                    <div style="margin-bottom: 15px; padding: 10px; background-color: var(--neutral-100); border-radius: 4px;">
+                        <strong>Información del archivo:</strong><br>
+                        📎 Nombre: ${archivo.nombre}<br>
+                        📊 Tamaño: ${formatearTamanoArchivo(archivo.tamaño)}<br>
+                        📅 Subido: ${new Date(archivo.fechaSubida).toLocaleDateString('es-ES')}<br>
+                        🔗 Tipo: ${archivo.tipo || 'Desconocido'}
+                    </div>
+                    <div id="contenidoArchivo" style="text-align: center; padding: 20px;">
+                        ${generarVisualizacionArchivo(archivo)}
+                    </div>
+                </div>
+                <div class="modal-footer" style="padding: 15px 20px; border-top: 1px solid var(--neutral-300);">
+                    <button class="btn btn-secondary" onclick="descargarArchivoAlbaran('${albaranId}')">
+                        💾 Descargar
+                    </button>
+                    <button class="btn btn-primary" onclick="cerrarModalVerArchivo()">
+                        Cerrar
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // Añadir modal al body
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+}
+
+function generarVisualizacionArchivo(archivo) {
+    if (!archivo.base64) {
+        return '<p style="color: var(--neutral-600);">No se pudo cargar el archivo para vista previa.</p>';
+    }
+    
+    const tipo = archivo.tipo.toLowerCase();
+    
+    if (tipo.includes('image')) {
+        return `<img src="${archivo.base64}" alt="${archivo.nombre}" style="max-width: 100%; max-height: 60vh; border: 1px solid var(--neutral-300); border-radius: 4px;">`;
+    } else if (tipo.includes('pdf')) {
+        return `<embed src="${archivo.base64}" type="application/pdf" width="100%" height="60vh" style="border: 1px solid var(--neutral-300); border-radius: 4px;">`;
+    } else {
+        return `
+            <div style="padding: 40px; background-color: var(--neutral-100); border-radius: 8px; border: 2px dashed var(--neutral-400);">
+                <div style="font-size: 48px; margin-bottom: 15px;">📄</div>
+                <p style="color: var(--neutral-600); margin-bottom: 10px;">
+                    Vista previa no disponible para este tipo de archivo
+                </p>
+                <p style="color: var(--neutral-500); font-size: 0.875rem;">
+                    Tipo: ${archivo.tipo}<br>
+                    Usa el botón "Descargar" para abrir el archivo
+                </p>
+            </div>
+        `;
+    }
+}
+
+function formatearTamanoArchivo(bytes) {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+}
+
+function descargarArchivoAlbaran(albaranId) {
+    const albaran = albaranes.find(a => a.id === albaranId);
+    if (!albaran || !albaran.archivo || !albaran.archivo.base64) {
+        mostrarToast('No se pudo descargar el archivo', 'error');
+        return;
+    }
+    
+    const link = document.createElement('a');
+    link.href = albaran.archivo.base64;
+    link.download = albaran.archivo.nombre;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    mostrarToast('Descarga iniciada', 'success');
+}
+
+function cerrarModalVerArchivo() {
+    const modal = document.getElementById('modalVerArchivo');
+    if (modal) {
+        modal.remove();
+    }
+}
+
+// Añadir evento para cerrar con Escape
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        cerrarModalVerArchivo();
+    }
+});
+
 // ===== MODALES =====
 function abrirModalNuevoAlbaran() {
     document.getElementById('modalNuevoAlbaran').classList.add('active');
@@ -478,6 +628,12 @@ function abrirModalNuevoAlbaran() {
 function cerrarModal() {
     document.getElementById('modalNuevoAlbaran').classList.remove('active');
     document.getElementById('formNuevoAlbaran').reset();
+    
+    // Limpiar específicamente el campo de archivo
+    const archivoInput = document.getElementById('archivoAlbaran');
+    if (archivoInput) {
+        archivoInput.value = '';
+    }
 }
 
 function abrirModalRecepcion(albaranId) {
