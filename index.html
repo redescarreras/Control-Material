@@ -47,7 +47,7 @@
                 </div>
             </div>
             <div class="header-actions">
-                <button id="btnBuscar" class="btn btn-info" onclick="abrirBuscador()">
+                <button id="btnBuscar" class="btn btn-info">
                     🔍 Buscar
                 </button>
                 <button id="btnExportar" class="btn btn-secondary" onclick="exportarDatosSimple()">
@@ -254,7 +254,7 @@
                                 <div class="reporte-icon">📋</div>
                                 <h3>Albaranes Pendientes</h3>
                                 <p>Reporte completo de albaranes que aún no han sido recibidos</p>
-                                <button class="btn btn-primary" onclick="generarReporte('pendientes')">
+                                <button class="btn btn-primary" onclick="abrirModalReportes('pendientes')">
                                     Descargar PDF
                                 </button>
                             </div>
@@ -262,7 +262,7 @@
                                 <div class="reporte-icon">✅</div>
                                 <h3>Albaranes Recibidos</h3>
                                 <p>Reporte de albaranes entregados correctamente</p>
-                                <button class="btn btn-primary" onclick="generarReporte('recibidos')">
+                                <button class="btn btn-primary" onclick="abrirModalReportes('recibidos')">
                                     Descargar PDF
                                 </button>
                             </div>
@@ -270,7 +270,7 @@
                                 <div class="reporte-icon">⚠️</div>
                                 <h3>Material Faltante</h3>
                                 <p>Reporte de albaranes con material incompleto</p>
-                                <button class="btn btn-primary" onclick="generarReporte('faltantes')">
+                                <button class="btn btn-primary" onclick="abrirModalReportes('faltantes')">
                                     Descargar PDF
                                 </button>
                             </div>
@@ -278,7 +278,7 @@
                                 <div class="reporte-icon">📊</div>
                                 <h3>Reporte Completo</h3>
                                 <p>Resumen general de todos los albaranes</p>
-                                <button class="btn btn-primary" onclick="generarReporte('completo')">
+                                <button class="btn btn-primary" onclick="abrirModalReportes('completo')">
                                     Descargar PDF
                                 </button>
                             </div>
@@ -286,7 +286,7 @@
                                 <div class="reporte-icon">🔌</div>
                                 <h3>Reporte de Cables</h3>
                                 <p>Control detallado de cables instalados y entradas</p>
-                                <button class="btn btn-warning" onclick="generarReporte('cables')">
+                                <button class="btn btn-warning" onclick="abrirModalReportes('cables')">
                                     Descargar PDF
                                 </button>
                             </div>
@@ -294,7 +294,7 @@
                                 <div class="reporte-icon">🛡️</div>
                                 <h3>Reporte de Subconductos</h3>
                                 <p>Control detallado de subconductos instalados y entradas</p>
-                                <button class="btn btn-secondary" onclick="generarReporte('subconductos')">
+                                <button class="btn btn-secondary" onclick="abrirModalReportes('subconductos')">
                                     Descargar PDF
                                 </button>
                             </div>
@@ -302,9 +302,37 @@
                                 <div class="reporte-icon">↩️</div>
                                 <h3>Reporte de Devoluciones</h3>
                                 <p>Control detallado de devoluciones de bobinas y cables</p>
-                                <button class="btn btn-primary" onclick="generarReporte('devoluciones')">
+                                <button class="btn btn-primary" onclick="abrirModalReportes('devoluciones')">
                                     Descargar PDF
                                 </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Filtro de Fechas para Reportes -->
+                        <div class="filtro-fechas-container" style="margin-top: 30px; padding: 20px; background: var(--neutral-100); border-radius: 8px;">
+                            <h3 style="margin-bottom: 15px;">📅 Filtro de Fechas para Reportes</h3>
+                            <div class="form-group">
+                                <label>Seleccionar rango de fechas:</label>
+                                <div style="display: flex; gap: 15px; align-items: center; flex-wrap: wrap;">
+                                    <label class="radio-label">
+                                        <input type="radio" name="filtroFecha" value="todo" checked onchange="toggleFiltroFechas()">
+                                        <span>Todo</span>
+                                    </label>
+                                    <label class="radio-label">
+                                        <input type="radio" name="filtroFecha" value="rango" onchange="toggleFiltroFechas()">
+                                        <span>Seleccionar fechas</span>
+                                    </label>
+                                </div>
+                            </div>
+                            <div id="rangoFechas" style="display: none; margin-top: 15px;">
+                                <div class="form-group">
+                                    <label for="fechaDesde">Desde:</label>
+                                    <input type="date" id="fechaDesde" name="fechaDesde">
+                                </div>
+                                <div class="form-group">
+                                    <label for="fechaHasta">Hasta:</label>
+                                    <input type="date" id="fechaHasta" name="fechaHasta">
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -739,6 +767,45 @@
                 <div class="form-actions">
                     <button type="button" class="btn btn-secondary" onclick="cerrarModalImportar()">Cancelar</button>
                     <button type="button" class="btn btn-warning" id="btnConfirmarImportar" onclick="confirmarImportar()" disabled>Importar Datos</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para Reportes con Filtro de Fechas -->
+    <div id="modalReportes" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Generar Reporte</h2>
+                <button class="modal-close" onclick="cerrarModalReportes()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Seleccionar rango de fechas:</label>
+                    <div style="display: flex; gap: 15px; align-items: center; flex-wrap: wrap;">
+                        <label class="radio-label">
+                            <input type="radio" name="filtroFechaReporte" value="todo" checked onchange="toggleFiltroFechasModal()">
+                            <span>Todo</span>
+                        </label>
+                        <label class="radio-label">
+                            <input type="radio" name="filtroFechaReporte" value="rango" onchange="toggleFiltroFechasModal()">
+                            <span>Seleccionar fechas</span>
+                        </label>
+                    </div>
+                </div>
+                <div id="rangoFechasReporte" style="display: none; margin-top: 15px;">
+                    <div class="form-group">
+                        <label for="fechaDesdeReporte">Desde:</label>
+                        <input type="date" id="fechaDesdeReporte" name="fechaDesdeReporte">
+                    </div>
+                    <div class="form-group">
+                        <label for="fechaHastaReporte">Hasta:</label>
+                        <input type="date" id="fechaHastaReporte" name="fechaHastaReporte">
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="cerrarModalReportes()">Cancelar</button>
+                    <button type="button" class="btn btn-primary" onclick="iniciarGeneracionReporte()">Generar</button>
                 </div>
             </div>
         </div>

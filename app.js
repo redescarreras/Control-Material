@@ -4,6 +4,150 @@ let albaranSeleccionado = null;
 let cables = [];
 let subconductos = [];
 let devoluciones = [];
+let reporteActual = '';
+
+// ===== FILTRO DE FECHAS PARA REPORTES =====
+function toggleFiltroFechas() {
+    const filtroValue = document.querySelector('input[name="filtroFecha"]:checked').value;
+    const rangoFechas = document.getElementById('rangoFechas');
+    if (rangoFechas) {
+        rangoFechas.style.display = filtroValue === 'rango' ? 'block' : 'none';
+    }
+}
+
+function obtenerDatosFiltrados(tipo) {
+    const filtroValue = document.querySelector('input[name="filtroFecha"]:checked')?.value || 'todo';
+    const fechaDesde = document.getElementById('fechaDesde')?.value;
+    const fechaHasta = document.getElementById('fechaHasta')?.value;
+    
+    let datos = [];
+    
+    // Función auxiliar para filtrar por fecha
+    const filtrarPorFecha = (items) => {
+        if (filtroValue === 'todo' || !fechaDesde || !fechaHasta) {
+            return items;
+        }
+        const desde = new Date(fechaDesde);
+        const hasta = new Date(fechaHasta);
+        hasta.setHours(23, 59, 59); // Fin del día
+        
+        return items.filter(item => {
+            const fechaItem = new Date(item.fecha);
+            return fechaItem >= desde && fechaItem <= hasta;
+        });
+    };
+    
+    switch(tipo) {
+        case 'pendientes':
+            datos = filtrarPorFecha(albaranes.filter(a => a.estado === 'pendiente'));
+            break;
+        case 'recibidos':
+            datos = filtrarPorFecha(albaranes.filter(a => a.estado === 'recibido' || a.estado === 'faltante'));
+            break;
+        case 'faltantes':
+            datos = filtrarPorFecha(albaranes.filter(a => a.estado === 'faltante'));
+            break;
+        case 'completo':
+            datos = filtrarPorFecha(albaranes);
+            break;
+        case 'cables':
+            datos = filtrarPorFecha(cables);
+            break;
+        case 'subconductos':
+            datos = filtrarPorFecha(subconductos);
+            break;
+        case 'devoluciones':
+            datos = filtrarPorFecha(devoluciones);
+            break;
+    }
+    
+    return datos;
+}
+
+function mostrarErrorFechas() {
+    const filtroValue = document.querySelector('input[name="filtroFecha"]:checked')?.value;
+    if (filtroValue === 'rango') {
+        const fechaDesde = document.getElementById('fechaDesde')?.value;
+        const fechaHasta = document.getElementById('fechaHasta')?.value;
+        if (!fechaDesde || !fechaHasta) {
+            mostrarToast('Por favor selecciona ambas fechas', 'error');
+            return true;
+        }
+    }
+    return false;
+}
+
+// ===== MODAL DE REPORTES =====
+function abrirModalReportes(tipo) {
+    reporteActual = tipo;
+    document.getElementById('modalReportes').classList.add('active');
+    
+    // Resetear opciones del filtro
+    const radioTodo = document.querySelector('input[name="filtroFechaReporte"][value="todo"]');
+    if (radioTodo) {
+        radioTodo.checked = true;
+    }
+    toggleFiltroFechasModal();
+}
+
+function cerrarModalReportes() {
+    document.getElementById('modalReportes').classList.remove('active');
+    reporteActual = '';
+}
+
+function toggleFiltroFechasModal() {
+    const filtroValue = document.querySelector('input[name="filtroFechaReporte"]:checked')?.value || 'todo';
+    const rangoFechas = document.getElementById('rangoFechasReporte');
+    if (rangoFechas) {
+        rangoFechas.style.display = filtroValue === 'rango' ? 'block' : 'none';
+    }
+}
+
+function iniciarGeneracionReporte() {
+    const filtroValue = document.querySelector('input[name="filtroFechaReporte"]:checked')?.value || 'todo';
+    const tipoReporte = reporteActual; // Guardar el tipo antes de cerrar
+    
+    // Sincronizar con el sistema de filtros existente
+    const mainFiltroTodo = document.querySelector('input[name="filtroFecha"][value="todo"]');
+    const mainFiltroRango = document.querySelector('input[name="filtroFecha"][value="rango"]');
+    const mainFechaDesde = document.getElementById('fechaDesde');
+    const mainFechaHasta = document.getElementById('fechaHasta');
+    const modalFechaDesde = document.getElementById('fechaDesdeReporte');
+    const modalFechaHasta = document.getElementById('fechaHastaReporte');
+    
+    if (filtroValue === 'todo') {
+        // Seleccionar "Todo" en el sistema principal
+        if (mainFiltroTodo) mainFiltroTodo.checked = true;
+        if (mainFiltroRango) mainFiltroRango.checked = false;
+        toggleFiltroFechas(); // Actualizar visibilidad del rango en el sistema principal
+    } else {
+        // Sincronizar fechas y seleccionar "Rango"
+        if (mainFiltroRango) mainFiltroRango.checked = true;
+        if (mainFiltroTodo) mainFiltroTodo.checked = false;
+        
+        if (modalFechaDesde && modalFechaHasta && mainFechaDesde && mainFechaHasta) {
+            mainFechaDesde.value = modalFechaDesde.value;
+            mainFechaHasta.value = modalFechaHasta.value;
+        }
+        toggleFiltroFechas(); // Actualizar visibilidad del rango en el sistema principal
+    }
+    
+    console.log('📊 Generando reporte:', {
+        tipo: tipoReporte,
+        filtro: filtroValue,
+        fechaDesde: modalFechaDesde?.value,
+        fechaHasta: modalFechaHasta?.value
+    });
+    
+    cerrarModalReportes();
+    
+    // Generar el reporte usando la función guardada
+    if (tipoReporte) {
+        generarReporte(tipoReporte);
+    } else {
+        mostrarToast('Error: No se ha seleccionado tipo de reporte', 'error');
+    }
+}
 
 // ===== INICIALIZACIÓN =====
 document.addEventListener('DOMContentLoaded', function() {
@@ -151,6 +295,9 @@ function configurarEventListeners() {
     document.getElementById('btnNuevaDevolucion').addEventListener('click', abrirModalNuevaDevolucion);
     document.getElementById('formNuevaDevolucion').addEventListener('submit', crearDevolucion);
 
+    // Modal buscador
+    document.getElementById('btnBuscar').addEventListener('click', abrirBuscador);
+
     // Modal recepción
     document.querySelectorAll('input[name="estadoRecepcion"]').forEach(radio => {
         radio.addEventListener('change', toggleDetalleFaltante);
@@ -182,6 +329,7 @@ function configurarEventListeners() {
                 cerrarModalDevolucion();
                 cerrarModalBuscador();
                 cerrarModalImportar();
+                cerrarModalReportes();
             }
         });
     });
@@ -198,6 +346,7 @@ function configurarEventListeners() {
             cerrarModalDevolucion();
             cerrarModalBuscador();
             cerrarModalImportar();
+            cerrarModalReportes();
         }
     });
 
@@ -347,8 +496,14 @@ function eliminarAlbaran(id) {
 
 // ===== MOSTRAR ALBARANES =====
 function mostrarAlbaranes() {
-    const tabActiva = document.querySelector('.tab-btn.active').dataset.tab;
-    const contenedor = document.getElementById(`lista-${tabActiva}`);
+    const tabActiva = document.querySelector('.tab-btn.active')?.dataset?.tab;
+    const contenedor = tabActiva ? document.getElementById(`lista-${tabActiva}`) : null;
+    
+    // Si no existe el contenedor, salir
+    if (!contenedor) {
+        console.warn('No se encontró el contenedor para mostrar albaranes');
+        return;
+    }
     
     let albaranesMostrar = [];
     
@@ -1409,6 +1564,9 @@ function crearTarjetaMaterial(material) {
     } else if (material.accion === 'instalacion') {
         estadoClass = 'status-faltante';
         estadoText = 'Instalado';
+    } else if (material.accion === 'solicitado') {
+        estadoClass = 'status-recibido';
+        estadoText = 'Solicitado';
     }
 
     let observacionesHtml = '';
@@ -1440,6 +1598,28 @@ function crearTarjetaMaterial(material) {
         `;
     }
 
+    // Botones de acción
+    let botonesHtml = '';
+    const tipoMaterial = material.tipoMaterial || (material.tipoCable ? 'cable' : 'subconducto');
+    
+    if (tipoMaterial === 'subconducto' && material.accion !== 'entrada') {
+        // Para subconductos, mostrar botón Solicitado si no está en entrada
+        botonesHtml = `
+            <button class="btn btn-warning" onclick="marcarSolicitado('${tipoMaterial}', '${material.id}')" title="Marcar como Solicitado">
+                📦 Solicitado
+            </button>
+            <button class="btn btn-secondary" onclick="eliminarMaterial('${tipoMaterial}', '${material.id}')">
+                🗑️ Eliminar
+            </button>
+        `;
+    } else {
+        botonesHtml = `
+            <button class="btn btn-secondary" onclick="eliminarMaterial('${tipoMaterial}', '${material.id}')">
+                🗑️ Eliminar
+            </button>
+        `;
+    }
+
     return `
         <div class="albaran-card">
             <div class="albaran-header">
@@ -1460,9 +1640,7 @@ function crearTarjetaMaterial(material) {
                 ${observacionesHtml}
             </div>
             <div class="albaran-actions">
-                <button class="btn btn-secondary" onclick="eliminarMaterial('${material.tipoMaterial}', '${material.id}')">
-                    🗑️ Eliminar
-                </button>
+                ${botonesHtml}
             </div>
         </div>
     `;
@@ -1480,6 +1658,7 @@ function calcularStock(tipo) {
         } else if (material.accion === 'instalacion') {
             totalInstalado += material.metros;
         }
+        // Los materiales con acción 'solicitado' no restan del stock disponible
     });
     
     return {
@@ -1487,6 +1666,30 @@ function calcularStock(tipo) {
         instalado: totalInstalado,
         disponible: totalRecibido - totalInstalado
     };
+}
+
+// Función para marcar subconducto como solicitado
+function marcarSolicitado(tipo, materialId) {
+    if (tipo === 'subconducto') {
+        const subconducto = subconductos.find(m => m.id === materialId);
+        if (subconducto && subconducto.accion === 'instalacion') {
+            if (confirm('¿Marcar este subconducto como Solicitado? Esto aumentará el stock disponible.')) {
+                // Cambiar el estado a solicitado
+                subconducto.accion = 'solicitado';
+                subconducto.fechaSolicitado = new Date().toISOString();
+                
+                guardarMateriales();
+                mostrarMateriales('subconducto');
+                actualizarContadores();
+                actualizarStockDisplay('subconducto');
+                mostrarToast('Subconducto marcado como Solicitado', 'success');
+            }
+        } else {
+            mostrarToast('Solo se pueden marcar subconductos instalados', 'warning');
+        }
+    } else {
+        mostrarToast('Esta función solo está disponible para subconductos', 'warning');
+    }
 }
 
 function calcularStockPorTipo(tipoMaterial) {
@@ -1544,7 +1747,9 @@ function generarReporteMateriales(tipoMaterial) {
     
     let yPos = 75;
     
-    const materialArray = tipoMaterial === 'cable' ? cables : subconductos;
+    // Obtener datos filtrados
+    const tipoFiltro = tipoMaterial === 'cable' ? 'cables' : 'subconductos';
+    const materialArray = obtenerDatosFiltrados(tipoFiltro);
     const stockPorTipo = calcularStockPorTipo(tipoMaterial);
     
     // Resumen por tipo
@@ -1572,7 +1777,7 @@ function generarReporteMateriales(tipoMaterial) {
     
     yPos += 15;
     
-    // Tabla detallada
+    // Tabla detallada con columnas: ID Obra - Tipo - Acción - Metros - Fecha
     if (materialArray.length > 0) {
         doc.setFontSize(14);
         doc.setTextColor(0, 0, 0);
@@ -1585,12 +1790,11 @@ function generarReporteMateriales(tipoMaterial) {
         doc.setFillColor(255, 85, 0);
         doc.rect(20, yPos - 8, 170, 8, 'F');
         
-        doc.text('ID', 22, yPos - 2);
-        doc.text('Tipo', 45, yPos - 2);
-        doc.text('Acción', 100, yPos - 2);
-        doc.text('Metros', 130, yPos - 2);
-        doc.text('Fecha', 155, yPos - 2);
-        doc.text('Obra', 180, yPos - 2);
+        doc.text('ID Obra', 22, yPos - 2);
+        doc.text('Tipo', 65, yPos - 2);
+        doc.text('Acción', 105, yPos - 2);
+        doc.text('Metros', 135, yPos - 2);
+        doc.text('Fecha', 165, yPos - 2);
         
         yPos += 12;
         
@@ -1609,22 +1813,53 @@ function generarReporteMateriales(tipoMaterial) {
             }
             
             const tipo = material.tipoCable || material.tipoSubconducto || 'N/A';
-            const accion = material.accion === 'entrada' ? 'Entrada' : 'Instalación';
+            const accion = material.accion === 'entrada' ? 'Entrada' : 
+                           material.accion === 'solicitado' ? 'Solicitado' : 'Instalación';
             const fecha = new Date(material.fecha).toLocaleDateString('es-ES');
             const obra = material.idObra || '-';
             
-            // Ajustar texto
-            const tipoText = tipo.length > 20 ? tipo.substring(0, 20) + '...' : tipo;
-            const obraText = obra.length > 8 ? obra.substring(0, 8) + '...' : obra;
+            // Truncar tipo si es muy largo
+            const tipoTruncado = doc.splitTextToSize(tipo, 38);
             
-            doc.text(material.id, 22, yPos - 2);
-            doc.text(tipoText, 45, yPos - 2);
-            doc.text(accion, 100, yPos - 2);
-            doc.text(`${material.metros}m`, 130, yPos - 2);
-            doc.text(fecha, 155, yPos - 2);
-            doc.text(obraText, 180, yPos - 2);
+            // Calcular altura de la fila basada en el contenido más largo
+            const alturaFila = Math.max(8, tipoTruncado.length * 5);
             
-            yPos += 8;
+            // Verificar si necesita nueva página
+            if (yPos + alturaFila > 270) {
+                doc.addPage();
+                yPos = 30;
+            }
+            
+            // Alternar colores de fondo - ajustar a la altura de la fila
+            if (index % 2 === 0) {
+                doc.setFillColor(245, 241, 230);
+                doc.rect(20, yPos - 8, 170, alturaFila, 'F');
+            }
+            
+            // Usar anchos de columna definidos
+            const colObra = 22;
+            const colTipo = 65;
+            const colAccion = 105;
+            const colMetros = 135;
+            const colFecha = 165;
+            
+            // Truncar tipo si es muy largo
+            doc.text(tipoTruncado, colTipo, yPos - 2);
+            
+            // Acción
+            doc.text(accion, colAccion, yPos - 2);
+            
+            // Metros
+            doc.text(`${material.metros}m`, colMetros, yPos - 2);
+            
+            // Fecha
+            doc.text(fecha, colFecha, yPos - 2);
+            
+            // ID Obra
+            doc.text(obra, colObra, yPos - 2);
+            
+            // Mover yPos según la altura de la fila
+            yPos += alturaFila;
         });
     }
     
@@ -1720,40 +1955,76 @@ function generarReporteDevoluciones() {
         doc.text('Detalle de Devoluciones', 20, yPos);
         yPos += 15;
         
-        // Headers
+        // Headers: ID Obra - Fecha - Tipo Cable/Metros - Estado
         doc.setFontSize(10);
         doc.setTextColor(255, 255, 255);
         doc.setFillColor(255, 85, 0);
         doc.rect(20, yPos - 8, 170, 8, 'F');
         
-        doc.text('ID Obra', 25, yPos - 2);
-        doc.text('Fecha', 90, yPos - 2);
-        doc.text('Estado', 150, yPos - 2);
+        // Ajustar posiciones de columnas para mejor visualización
+        // ID Obra (22-55), Fecha (55-85), Tipo Cable/Metros (85-155), Estado (155-190)
+        doc.text('ID Obra', 22, yPos - 2);
+        doc.text('Fecha', 55, yPos - 2);
+        doc.text('Tipo Cable/Metros', 85, yPos - 2);
+        doc.text('Estado', 158, yPos - 2);
         
         yPos += 12;
         
-        // Datos simplificados
+        // Datos detallados
         doc.setTextColor(0, 0, 0);
         devoluciones.forEach((devolucion, index) => {
             const fecha = new Date(devolucion.fechaEntrega).toLocaleDateString('es-ES');
             
-            if (yPos > 250) {
+            // Generar detalle de bobinas
+            let detalleBobinas = '';
+            let totalMetros = 0;
+            devolucion.bobinas.forEach((bobina, idx) => {
+                if (idx > 0) detalleBobinas += '\n';
+                if (bobina.tipoMaterial === 'bobina_vacia') {
+                    // Para bobina vacía
+                    detalleBobinas += `Vacía - ${bobina.tipoCableDevolucionVacia || 'N/A'}`;
+                } else if (bobina.tipoMaterial === 'bobina_con_cable') {
+                    // Para bobina con cable
+                    const metros = bobina.metrosCableBobina || 0;
+                    totalMetros += metros;
+                    detalleBobinas += `${bobina.tipoCableDevolucion || 'N/A'} - ${metros}m`;
+                } else if (bobina.tipoMaterial === 'otro') {
+                    // Para otro material
+                    detalleBobinas += `${bobina.descripcionOtroMaterial || 'Otro'} - ${bobina.metrosCableBobina || 0}m`;
+                }
+            });
+            
+            // Calcular altura de la fila basada en el contenido
+            const detalleLineas = doc.splitTextToSize(detalleBobinas, 70);
+            const alturaFila = Math.max(8, detalleLineas.length * 5);
+            
+            // Verificar si necesita nueva página
+            if (yPos + alturaFila > 270) {
                 doc.addPage();
                 yPos = 30;
             }
             
-            // Alternar colores de fondo
+            // Alternar colores de fondo - rectángulo se ajusta a la altura de la fila
             if (index % 2 === 0) {
                 doc.setFillColor(245, 241, 230);
-                doc.rect(20, yPos - 8, 170, 8, 'F');
+                doc.rect(20, yPos - 8, 170, alturaFila, 'F');
             }
             
-            // Solo ID Obra, Fecha y Estado (como pidió el usuario)
-            doc.text(devolucion.idObra, 25, yPos - 2);
-            doc.text(fecha, 90, yPos - 2);
-            doc.text('Completada', 150, yPos - 2);
+            // ID Obra - ajustar texto si es muy largo
+            const obraText = doc.splitTextToSize(devolucion.idObra || '-', 30);
+            doc.text(obraText, 22, yPos - 2);
             
-            yPos += 12; // Más espacio entre registros
+            // Fecha
+            doc.text(fecha, 55, yPos - 2);
+            
+            // Tipo Cable/Metros
+            doc.text(detalleLineas, 85, yPos - 2);
+            
+            // Estado
+            doc.text('Completada', 158, yPos - 2);
+            
+            // Mover yPos según la altura de la fila
+            yPos += alturaFila;
         });
     }
     
@@ -1818,11 +2089,12 @@ function generarReporte(tipo) {
         doc.setFillColor(255, 85, 0);
         doc.rect(20, yPos - 8, 170, 8, 'F');
         
+        // Posiciones de columnas: ID Obra (22), Fecha (70), Tipo (110), Estado (145), Cuenta (170)
         doc.text('ID Obra', 22, yPos - 2);
-        doc.text('Fecha', 85, yPos - 2);
-        doc.text('Tipo', 120, yPos - 2);
-        doc.text('Estado', 150, yPos - 2);
-        doc.text('Cuenta', 175, yPos - 2);
+        doc.text('Fecha', 70, yPos - 2);
+        doc.text('Tipo', 110, yPos - 2);
+        doc.text('Estado', 145, yPos - 2);
+        doc.text('Cuenta', 170, yPos - 2);
         
         yPos += 12;
         
@@ -1844,15 +2116,16 @@ function generarReporte(tipo) {
             const estado = albaran.estado === 'pendiente' ? 'Pendiente' : 
                           albaran.estado === 'recibido' ? 'Recibido' : 'Faltante';
             
-            // Ajustar texto (sin truncar ID de obra)
-            const obraText = albaran.idObra; // Sin truncamiento
-            const cuentaText = albaran.cuentaCargo.length > 10 ? albaran.cuentaCargo.substring(0, 10) + '...' : albaran.cuentaCargo;
+            // Truncar textos largos para que quepan en sus columnas
+            const obraText = albaran.idObra.length > 15 ? albaran.idObra.substring(0, 15) + '...' : albaran.idObra;
+            const tipoText = albaran.tipoInstalacion.length > 12 ? albaran.tipoInstalacion.substring(0, 12) + '...' : albaran.tipoInstalacion;
+            const cuentaText = albaran.cuentaCargo.length > 15 ? albaran.cuentaCargo.substring(0, 15) + '...' : albaran.cuentaCargo;
             
             doc.text(obraText, 22, yPos - 2);
-            doc.text(fecha, 85, yPos - 2);
-            doc.text(albaran.tipoInstalacion, 120, yPos - 2);
-            doc.text(estado, 150, yPos - 2);
-            doc.text(cuentaText, 175, yPos - 2);
+            doc.text(fecha, 70, yPos - 2);
+            doc.text(tipoText, 110, yPos - 2);
+            doc.text(estado, 145, yPos - 2);
+            doc.text(cuentaText, 170, yPos - 2);
             
             yPos += 8;
         });
@@ -1863,17 +2136,17 @@ function generarReporte(tipo) {
     // Generar según el tipo
     switch(tipo) {
         case 'pendientes':
-            const pendientes = albaranes.filter(a => a.estado === 'pendiente');
+            const pendientes = obtenerDatosFiltrados('pendientes');
             agregarTabla(pendientes, 'Albaranes Pendientes');
             break;
             
         case 'recibidos':
-            const recibidos = albaranes.filter(a => a.estado === 'recibido');
+            const recibidos = obtenerDatosFiltrados('recibidos');
             agregarTabla(recibidos, 'Albaranes Recibidos');
             break;
             
         case 'faltantes':
-            const faltantes = albaranes.filter(a => a.estado === 'faltante');
+            const faltantes = obtenerDatosFiltrados('faltantes');
             agregarTabla(faltantes, 'Albaranes con Material Faltante');
             
             // Agregar detalles del material faltante
@@ -1910,15 +2183,15 @@ function generarReporte(tipo) {
             
         case 'cables':
             generarReporteMateriales('cable');
-            break;
+            return;
             
         case 'subconductos':
             generarReporteMateriales('subconducto');
-            break;
+            return;
             
         case 'devoluciones':
             generarReporteDevoluciones();
-            break;
+            return;
             
         case 'completo':
             // Resumen general
@@ -1927,10 +2200,11 @@ function generarReporte(tipo) {
             doc.text('Resumen General', 20, yPos);
             yPos += 15;
             
-            const total = albaranes.length;
-            const pendientesCount = albaranes.filter(a => a.estado === 'pendiente').length;
-            const recibidosCount = albaranes.filter(a => a.estado === 'recibido').length;
-            const faltantesCount = albaranes.filter(a => a.estado === 'faltante').length;
+            const todosAlbaranes = obtenerDatosFiltrados('completo');
+            const total = todosAlbaranes.length;
+            const pendientesCount = todosAlbaranes.filter(a => a.estado === 'pendiente').length;
+            const recibidosCount = todosAlbaranes.filter(a => a.estado === 'recibido').length;
+            const faltantesCount = todosAlbaranes.filter(a => a.estado === 'faltante').length;
             
             doc.setFontSize(12);
             doc.text(`Total de Albaranes: ${total}`, 25, yPos);
@@ -2109,26 +2383,33 @@ function abrirModalImportar() {
 }
 
 function cerrarModalImportar() {
-    document.getElementById('modalImportar').classList.remove('active');
-    document.getElementById('archivoImportar').value = '';
-    document.getElementById('preview-import').style.display = 'none';
-    document.getElementById('btnConfirmarImportar').disabled = true;
-}
-
-function procesarArchivoImportar() {
-    const archivo = document.getElementById('archivoImportar').files[0];
+    const modal = document.getElementById('modalImportar');
+    const archivoInput = document.getElementById('archivoImportar');
     const preview = document.getElementById('preview-import');
     const btnConfirmar = document.getElementById('btnConfirmarImportar');
     
+    if (modal) modal.classList.remove('active');
+    if (archivoInput) archivoInput.value = '';
+    if (preview) preview.style.display = 'none';
+    if (btnConfirmar) btnConfirmar.disabled = true;
+}
+
+function procesarArchivoImportar() {
+    const archivo = document.getElementById('archivoImportar')?.files[0];
+    const preview = document.getElementById('preview-import');
+    const btnConfirmar = document.getElementById('btnConfirmarImportar');
+    
+    // Si no hay archivo o los elementos no existen, limpiar y salir
     if (!archivo) {
-        preview.style.display = 'none';
-        btnConfirmar.disabled = true;
+        if (preview) preview.style.display = 'none';
+        if (btnConfirmar) btnConfirmar.disabled = true;
         return;
     }
     
     if (!archivo.name.endsWith('.json')) {
         mostrarToast('❌ Solo se permiten archivos JSON', 'error');
-        document.getElementById('archivoImportar').value = '';
+        const archivoInput = document.getElementById('archivoImportar');
+        if (archivoInput) archivoInput.value = '';
         return;
     }
     
@@ -2144,14 +2425,15 @@ function procesarArchivoImportar() {
             
             // Mostrar preview
             mostrarPreviewImport(datos);
-            btnConfirmar.disabled = false;
+            if (btnConfirmar) btnConfirmar.disabled = false;
             
         } catch (error) {
             console.error('Error al procesar archivo:', error);
             mostrarToast('❌ Error al leer el archivo: formato inválido', 'error');
-            document.getElementById('archivoImportar').value = '';
-            preview.style.display = 'none';
-            btnConfirmar.disabled = true;
+            const archivoInput = document.getElementById('archivoImportar');
+            if (archivoInput) archivoInput.value = '';
+            if (preview) preview.style.display = 'none';
+            if (btnConfirmar) btnConfirmar.disabled = true;
         }
     };
     
@@ -2160,6 +2442,11 @@ function procesarArchivoImportar() {
 
 function mostrarPreviewImport(datos) {
     const preview = document.getElementById('preview-import');
+    
+    if (!preview) {
+        console.error('Elemento preview-import no encontrado');
+        return;
+    }
     
     const stats = {
         albaranes: datos.albaranes.length,
@@ -2241,15 +2528,35 @@ function confirmarImportar() {
 
 // ===== FUNCIONES SIMPLES PARA NUEVOS BOTONES =====
 function abrirBuscador() {
+    // Verificar que el modal existe
+    const modal = document.getElementById('modalBuscador');
+    const buscarInput = document.getElementById('buscarObra');
+    const resultadosDiv = document.getElementById('resultados-busqueda');
+    
+    if (!modal) {
+        console.error('Error: Modal del buscador no encontrado');
+        mostrarToast('Error: No se puede abrir el buscador', 'error');
+        return;
+    }
+    
     // Abrir modal del buscador
-    document.getElementById('modalBuscador').classList.add('active');
-    document.getElementById('buscarObra').value = '';
-    document.getElementById('buscarObra').focus();
-    mostrarResultadosIniciales();
+    modal.classList.add('active');
+    
+    if (buscarInput) {
+        buscarInput.value = '';
+        buscarInput.focus();
+    }
+    
+    if (resultadosDiv) {
+        resultadosDiv.innerHTML = '<div class="no-results"><p>💡 Ingresa un ID de obra para comenzar la búsqueda</p></div>';
+    }
 }
 
 function cerrarModalBuscador() {
-    document.getElementById('modalBuscador').classList.remove('active');
+    const modal = document.getElementById('modalBuscador');
+    if (modal) {
+        modal.classList.remove('active');
+    }
 }
 
 function mostrarResultadosIniciales() {
@@ -2287,17 +2594,17 @@ function buscarAlbaranes(termino) {
 
 function buscarCables(termino) {
     return cables.filter(cable => 
-        cable.idObra.toLowerCase().includes(termino.toLowerCase()) ||
-        cable.id.toLowerCase().includes(termino.toLowerCase()) ||
-        cable.tipoCable.toLowerCase().includes(termino.toLowerCase())
+        (cable.idObra || '').toLowerCase().includes(termino.toLowerCase()) ||
+        (cable.id || '').toLowerCase().includes(termino.toLowerCase()) ||
+        (cable.tipoCable || '').toLowerCase().includes(termino.toLowerCase())
     );
 }
 
 function buscarSubconductos(termino) {
     return subconductos.filter(subconducto => 
-        subconducto.idObra.toLowerCase().includes(termino.toLowerCase()) ||
-        subconducto.id.toLowerCase().includes(termino.toLowerCase()) ||
-        subconducto.tipoSubconducto.toLowerCase().includes(termino.toLowerCase())
+        (subconducto.idObra || '').toLowerCase().includes(termino.toLowerCase()) ||
+        (subconducto.id || '').toLowerCase().includes(termino.toLowerCase()) ||
+        (subconducto.tipoSubconducto || '').toLowerCase().includes(termino.toLowerCase())
     );
 }
 
@@ -2326,8 +2633,11 @@ function mostrarResultadosBusqueda(resultados) {
         resultados.albaranes.forEach(albaran => {
             const estadoIcon = albaran.estado === 'pendiente' ? '📋' : 
                               albaran.estado === 'recibido' ? '✅' : '⚠️';
+            // Determinar la pestaña correcta según el estado del albarán
+            const pestana = albaran.estado === 'pendiente' ? 'pendientes' : 
+                           albaran.estado === 'faltantes' ? 'faltantes' : 'recibidos';
             html += `
-                <div class="resultado-item">
+                <div class="resultado-item" onclick="irAObra('${albaran.idObra}', '${pestana}')" style="cursor: pointer;">
                     <div class="item-header">
                         <span class="item-id">${estadoIcon} ${albaran.id}</span>
                         <span class="item-fecha">${formatDate(albaran.fecha)}</span>
@@ -2345,10 +2655,6 @@ function mostrarResultadosBusqueda(resultados) {
                             <span class="detail-label">Instalación:</span>
                             <span class="detail-value">${albaran.tipoInstalacion}</span>
                         </div>
-                        <div class="detail-item">
-                            <span class="detail-label">Cuenta:</span>
-                            <span class="detail-value">${albaran.cuentaCargo}</span>
-                        </div>
                     </div>
                 </div>
             `;
@@ -2362,7 +2668,7 @@ function mostrarResultadosBusqueda(resultados) {
         html += '<h3>🔌 Cables</h3>';
         resultados.cables.forEach(cable => {
             html += `
-                <div class="resultado-item">
+                <div class="resultado-item" onclick="irAObra('${cable.idObra}', 'cables')" style="cursor: pointer;">
                     <div class="item-header">
                         <span class="item-id">🔌 ${cable.id}</span>
                         <span class="item-fecha">${formatDate(cable.fecha)}</span>
@@ -2381,8 +2687,8 @@ function mostrarResultadosBusqueda(resultados) {
                             <span class="detail-value">${cable.metros} m</span>
                         </div>
                         <div class="detail-item">
-                            <span class="detail-label">Categoría:</span>
-                            <span class="detail-value">${cable.categoria || 'Instalación'}</span>
+                            <span class="detail-label">Acción:</span>
+                            <span class="detail-value">${cable.accion === 'entrada' ? 'Entrada' : 'Instalación'}</span>
                         </div>
                     </div>
                 </div>
@@ -2397,7 +2703,7 @@ function mostrarResultadosBusqueda(resultados) {
         html += '<h3>🛡️ Subconductos</h3>';
         resultados.subconductos.forEach(subconducto => {
             html += `
-                <div class="resultado-item">
+                <div class="resultado-item" onclick="irAObra('${subconducto.idObra}', 'subconductos')" style="cursor: pointer;">
                     <div class="item-header">
                         <span class="item-id">🛡️ ${subconducto.id}</span>
                         <span class="item-fecha">${formatDate(subconducto.fecha)}</span>
@@ -2416,8 +2722,8 @@ function mostrarResultadosBusqueda(resultados) {
                             <span class="detail-value">${subconducto.metros} m</span>
                         </div>
                         <div class="detail-item">
-                            <span class="detail-label">Categoría:</span>
-                            <span class="detail-value">${subconducto.categoria || 'Instalación'}</span>
+                            <span class="detail-label">Acción:</span>
+                            <span class="detail-value">${subconducto.accion === 'entrada' ? 'Entrada' : 'Instalación'}</span>
                         </div>
                     </div>
                 </div>
@@ -2433,7 +2739,7 @@ function mostrarResultadosBusqueda(resultados) {
         resultados.devoluciones.forEach(devolucion => {
             const totalBobinas = devolucion.bobinas ? devolucion.bobinas.length : 0;
             html += `
-                <div class="resultado-item">
+                <div class="resultado-item" onclick="irAObra('${devolucion.idObra}', 'devoluciones')" style="cursor: pointer;">
                     <div class="item-header">
                         <span class="item-id">↩️ ${devolucion.id}</span>
                         <span class="item-fecha">${formatDate(devolucion.fecha)}</span>
@@ -2451,10 +2757,6 @@ function mostrarResultadosBusqueda(resultados) {
                             <span class="detail-label">Instalación:</span>
                             <span class="detail-value">${devolucion.tipoInstalacion}</span>
                         </div>
-                        <div class="detail-item">
-                            <span class="detail-label">Total Metros:</span>
-                            <span class="detail-value">${calcularTotalMetrosDevolucion(devolucion)} m</span>
-                        </div>
                     </div>
                 </div>
             `;
@@ -2463,6 +2765,13 @@ function mostrarResultadosBusqueda(resultados) {
     }
     
     container.innerHTML = html;
+}
+
+// Función para ir a la obra encontrada
+function irAObra(idObra, pestana) {
+    cerrarModalBuscador();
+    cambiarTab(pestana);
+    mostrarToast(`Navegando a: ${idObra}`, 'info');
 }
 
 function calcularTotalMetrosDevolucion(devolucion) {
